@@ -1,8 +1,11 @@
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
 #include <SDL2/SDL.h>
 #include <tuple>
 
 #include "OBJLoader.h"
+#include "ConvexHull.h"
 
 int main(int args, char *argv[])
 {
@@ -55,23 +58,37 @@ int main(int args, char *argv[])
     return 1;
   }
 
-  const int pointLocationx = windowWidth / 2;
-  const int pointLocationy = windowHeight / 2;
-
   SDL_FPoint *points;
   int size;
-  std::tie(points, size) = loadOBJ(filename, windowWidth, windowHeight);
+  std::tie(points, size) = load_obj(filename, windowWidth, windowHeight);
+
+  SDL_FPoint *hull_points;
+  int hull_size;
+  std::tie(hull_points, hull_size) = convex_hull(points, size);
 
   SDL_Event event;
   bool quit = false;
+  bool display_hull = false;
 
   while (!quit)
   {
     while (SDL_PollEvent(&event) != 0)
     {
-      if (event.type == SDL_QUIT)
+      switch (event.type)
       {
+      case SDL_QUIT:
         quit = true;
+        break;
+      case SDL_KEYDOWN:
+        switch (event.key.keysym.sym)
+        {
+        case SDLK_c:
+          display_hull = !display_hull;
+          break;
+        }
+        break;
+      default:
+        break;
       }
     }
 
@@ -83,12 +100,18 @@ int main(int args, char *argv[])
 
     SDL_RenderDrawPointsF(renderer, points, size);
 
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (int i = 0; i < size - 1; ++i)
+    if (display_hull)
     {
-      SDL_RenderDrawLine(renderer, points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
+      SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+      SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
+
+      SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+      for (int i = 0; i < hull_size - 1; ++i)
+      {
+        SDL_RenderDrawLine(renderer, hull_points[i].x, hull_points[i].y, hull_points[i + 1].x, hull_points[i + 1].y);
+      }
+      SDL_RenderDrawLine(renderer, hull_points[hull_size - 1].x, hull_points[hull_size - 1].y, hull_points[0].x, hull_points[0].y);
     }
-    SDL_RenderDrawLine(renderer, points[size - 1].x, points[size - 1].y, points[0].x, points[0].y);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 

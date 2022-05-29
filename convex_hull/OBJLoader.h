@@ -1,8 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include <string>
 #include <fstream>
+#include <string>
 #include <vector>
 #include <sstream>
 #include <algorithm>
@@ -10,7 +10,7 @@
 
 #include <SDL2/SDL.h>
 
-static std::tuple<SDL_FPoint *, int> loadOBJ(const char *file_name, int w, int h)
+static std::tuple<SDL_FPoint *, int> load_obj(const char *file_name, int w, int h)
 {
 
   std::stringstream ss;
@@ -43,7 +43,7 @@ static std::tuple<SDL_FPoint *, int> loadOBJ(const char *file_name, int w, int h
 
     ss >> coordx >> coordy;
     temp.x = std::stof(coordx) + half_w;
-    temp.y = std::stof(coordy) + half_h;
+    temp.y = std::stof(coordy) * -1 + half_h;
 
     v.push_back(temp);
   }
