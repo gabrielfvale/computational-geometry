@@ -60,7 +60,8 @@ int main(int args, char *argv[])
 
   SDL_FPoint *points;
   int size;
-  std::tie(points, size) = load_obj(filename, windowWidth, windowHeight);
+  std::vector<std::vector<int>> faces;
+  std::tie(points, size) = load_obj(filename, windowWidth, windowHeight, faces);
 
   SDL_FPoint *hull_points;
   int hull_size;
@@ -73,6 +74,7 @@ int main(int args, char *argv[])
   SDL_Event event;
   bool quit = false;
   bool display_hull = false;
+  bool display_wireframe = false;
 
   while (!quit)
   {
@@ -89,6 +91,9 @@ int main(int args, char *argv[])
         case SDLK_c:
           display_hull = !display_hull;
           break;
+        case SDLK_w:
+          display_wireframe = !display_wireframe;
+          break;
         }
         break;
       default:
@@ -103,6 +108,21 @@ int main(int args, char *argv[])
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     SDL_RenderDrawPointsF(renderer, points, size);
+
+    // Render wireframe
+    if (display_wireframe)
+    {
+
+      for (int i = 0; i < faces.size(); ++i)
+      {
+        int count = faces[i].size();
+        for (int j = 0; j < count - 1; ++j)
+        {
+          SDL_RenderDrawLine(renderer, points[j].x, points[j].y, points[j + 1].x, points[j + 1].y);
+        }
+        SDL_RenderDrawLine(renderer, points[count - 1].x, points[count - 1].y, points[0].x, points[0].y);
+      }
+    }
 
     if (display_hull)
     {
