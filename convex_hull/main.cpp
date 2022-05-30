@@ -66,6 +66,10 @@ int main(int args, char *argv[])
   int hull_size;
   std::tie(hull_points, hull_size) = convex_hull(points, size);
 
+  std::cout << "Loaded: " << filename << std::endl;
+  std::cout << "Points: " << size << std::endl;
+  std::cout << "Convex Hull Points: " << hull_size << std::endl;
+
   SDL_Event event;
   bool quit = false;
   bool display_hull = false;
@@ -102,7 +106,7 @@ int main(int args, char *argv[])
 
     if (display_hull)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+      SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
       SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
 
       SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
