@@ -47,10 +47,10 @@ static std::tuple<SDL_FPoint *, int> load_obj(const char *file_name, int w, int 
     }
     else if (prefix == "f")
     {
-      std::vector<int> indexes;
+      std::vector<int> indices;
       while (ss >> temp_ind)
-        indexes.push_back(temp_ind - 1);
-      faces.push_back(indexes);
+        indices.push_back(temp_ind - 1);
+      faces.push_back(indices);
     }
     else
     {

@@ -112,7 +112,6 @@ int main(int args, char *argv[])
     // Render wireframe
     if (display_wireframe)
     {
-
       for (int i = 0; i < faces.size(); ++i)
       {
         int count = faces[i].size();
