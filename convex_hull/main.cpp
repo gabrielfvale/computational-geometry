@@ -1,11 +1,15 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-#include <SDL2/SDL.h>
 #include <tuple>
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include "OBJLoader.h"
 #include "ConvexHull.h"
+
+#define IMG_PATH "objects/Apollo_white.png"
 
 int main(int args, char *argv[])
 {
@@ -34,6 +38,8 @@ int main(int args, char *argv[])
 
   SDL_Window *window;
   SDL_Renderer *renderer;
+  SDL_Texture *img = NULL;
+  int iw, ih;
 
   // Create window
   window = SDL_CreateWindow(
@@ -58,6 +64,14 @@ int main(int args, char *argv[])
     return 1;
   }
 
+  img = IMG_LoadTexture(renderer, IMG_PATH);
+  SDL_QueryTexture(img, NULL, NULL, &iw, &ih); // get the width and height of the texture
+  SDL_Rect texr;
+  texr.x = 0;
+  texr.y = 0;
+  texr.w = iw;
+  texr.h = ih;
+
   SDL_FPoint *points;
   int size;
   std::vector<std::vector<int>> faces;
@@ -75,6 +89,7 @@ int main(int args, char *argv[])
   bool quit = false;
   bool display_hull = false;
   bool display_wireframe = false;
+  bool display_image = true;
 
   while (!quit)
   {
@@ -94,6 +109,9 @@ int main(int args, char *argv[])
         case SDLK_w:
           display_wireframe = !display_wireframe;
           break;
+        case SDLK_i:
+          display_image = !display_image;
+          break;
         }
         break;
       default:
@@ -104,24 +122,31 @@ int main(int args, char *argv[])
     // Clear the screen
     SDL_RenderClear(renderer);
 
+    if (display_image && strcmp(filename, "objects/Apollo.obj") == 0)
+    {
+      SDL_SetTextureAlphaMod(img, 32);
+      SDL_RenderCopy(renderer, img, NULL, &texr);
+    }
+
     // Set color of renderer
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
+    // Draw mesh points
     SDL_RenderDrawPointsF(renderer, points, size);
 
     // Render wireframe
-    if (display_wireframe)
-    {
-      for (int i = 0; i < faces.size(); ++i)
-      {
-        int count = faces[i].size();
-        for (int j = 0; j < count - 1; ++j)
-        {
-          SDL_RenderDrawLine(renderer, points[j].x, points[j].y, points[j + 1].x, points[j + 1].y);
-        }
-        SDL_RenderDrawLine(renderer, points[count - 1].x, points[count - 1].y, points[0].x, points[0].y);
-      }
-    }
+    // if (display_wireframe)
+    // {
+    //   for (int i = 0; i < faces.size(); ++i)
+    //   {
+    //     int count = faces[i].size();
+    //     for (int j = 0; j < count - 1; ++j)
+    //     {
+    //       SDL_RenderDrawLine(renderer, points[j].x, points[j].y, points[j + 1].x, points[j + 1].y);
+    //     }
+    //     SDL_RenderDrawLine(renderer, points[count - 1].x, points[count - 1].y, points[0].x, points[0].y);
+    //   }
+    // }
 
     if (display_hull)
     {
@@ -138,7 +163,6 @@ int main(int args, char *argv[])
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-    // Show all the has been done behind the scenes
     SDL_RenderPresent(renderer);
   }
 

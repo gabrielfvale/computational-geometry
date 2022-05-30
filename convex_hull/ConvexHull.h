@@ -102,7 +102,6 @@ static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
   while (!s.empty())
   {
     SDL_FPoint p = s.top();
-    // std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
     v.push_back(p);
     s.pop();
   }
