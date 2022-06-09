@@ -88,16 +88,18 @@ int main(int args, char *argv[])
 
   SDL_FPoint *points;
   int size;
-  std::vector<std::vector<int>> faces;
-  std::tie(points, size) = load_obj(filename, windowWidth, windowHeight, faces);
+  std::tie(points, size) = load_obj(filename, windowWidth, windowHeight);
+  std::vector<std::vector<SDL_FPoint>> object = load_parts(filename, windowWidth, windowHeight);
 
   SDL_FPoint *hull_points;
   int hull_size;
   std::tie(hull_points, hull_size) = convex_hull(points, size);
+  std::vector<SDL_FPoint> test = joined_convex_hull(object);
 
   std::cout << "Loaded: " << filename << std::endl;
   std::cout << "Points: " << size << std::endl;
   std::cout << "Convex Hull Points: " << hull_size << std::endl;
+  std::cout << "Size: " << test.size() << std::endl;
 
   std::ostringstream oss;
   oss << "Points: " << size;
@@ -169,35 +171,39 @@ int main(int args, char *argv[])
 
     // Draw mesh points
     // SDL_RenderDrawPointsF(renderer, points, size);
-    for (int i = 0; i < size; ++i)
+
+    // for (auto part : object)
+    // {
+    for (int i = 0; i < test.size(); ++i)
     {
       // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
 
       // Render extra points around for visibility
       // Top
-      SDL_RenderDrawPointF(renderer, points[i].x - 1, points[i].y - 1);
-      SDL_RenderDrawPointF(renderer, points[i].x, points[i].y - 1);
-      SDL_RenderDrawPointF(renderer, points[i].x + 1, points[i].y - 1);
+      SDL_RenderDrawPointF(renderer, test[i].x - 1, test[i].y - 1);
+      SDL_RenderDrawPointF(renderer, test[i].x, test[i].y - 1);
+      SDL_RenderDrawPointF(renderer, test[i].x + 1, test[i].y - 1);
       // Bottom
-      SDL_RenderDrawPointF(renderer, points[i].x - 1, points[i].y + 1);
-      SDL_RenderDrawPointF(renderer, points[i].x, points[i].y + 1);
-      SDL_RenderDrawPointF(renderer, points[i].x + 1, points[i].y + 1);
+      SDL_RenderDrawPointF(renderer, test[i].x - 1, test[i].y + 1);
+      SDL_RenderDrawPointF(renderer, test[i].x, test[i].y + 1);
+      SDL_RenderDrawPointF(renderer, test[i].x + 1, test[i].y + 1);
       // Sides
-      SDL_RenderDrawPointF(renderer, points[i].x - 1, points[i].y);
-      SDL_RenderDrawPointF(renderer, points[i].x + 1, points[i].y);
+      SDL_RenderDrawPointF(renderer, test[i].x - 1, test[i].y);
+      SDL_RenderDrawPointF(renderer, test[i].x + 1, test[i].y);
     }
+    // }
 
     if (display_hull && hull_size > 0)
     {
-      SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-      SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
+      // SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+      // SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
 
       SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
       for (int i = 0; i < hull_size - 1; ++i)
       {
-        SDL_RenderDrawLine(renderer, hull_points[i].x, hull_points[i].y, hull_points[i + 1].x, hull_points[i + 1].y);
+        SDL_RenderDrawLine(renderer, test[i].x, test[i].y, test[i + 1].x, test[i + 1].y);
       }
-      SDL_RenderDrawLine(renderer, hull_points[hull_size - 1].x, hull_points[hull_size - 1].y, hull_points[0].x, hull_points[0].y);
+      SDL_RenderDrawLine(renderer, test[hull_size - 1].x, test[hull_size - 1].y, test[0].x, test[0].y);
     }
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);

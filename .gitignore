@@ -1,6 +1,10 @@
 # VSCode
 .vscode
 
+# Blender
+*.blend1
+*.mlt
+
 # Prerequisites
 *.d
 
@@ -8,7 +12,6 @@
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch

@@ -111,3 +111,102 @@ static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
 
   return std::make_tuple(result, v.size());
 }
+
+static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
+{
+  std::vector<SDL_FPoint> convex_hull_points;
+
+  SDL_FPoint *points = new SDL_FPoint[input.size()];
+  memcpy(points, &input.front(), input.size() * sizeof(SDL_FPoint));
+  int size = input.size();
+
+  // Iterate over points to find bottom-most or left-most
+  int min_y = points[0].y, min = 0;
+  for (int i = 1; i < size; ++i)
+  {
+    int y = points[i].y;
+    if ((y < min_y) || (min_y == y) && points[i].x < points[min].x)
+    {
+      min_y = points[i].y;
+      min = i;
+    }
+  }
+
+  // Swap min point
+  swap(points[0], points[min]);
+
+  // Sort
+  p0 = points[0];
+  std::qsort(&points[1], size - 1, sizeof(SDL_FPoint), comp);
+
+  int n = 1;
+
+  for (int i = 1; i < size; ++i)
+  {
+    while (i < n - 1 && orientation(p0, points[i], points[i + 1]) == 0)
+      i++;
+    points[n] = points[i];
+    n++;
+  }
+
+  // Case when convex hull is not possible
+  if (n < 3)
+    return {};
+
+  // Otherwise continue
+  std::stack<SDL_FPoint> s;
+  s.push(points[0]);
+  s.push(points[1]);
+  s.push(points[2]);
+
+  for (int i = 3; i < n; ++i)
+  {
+    while (s.size() > 1 && orientation(second_top(s), s.top(), points[i]) != 2)
+      s.pop();
+    s.push(points[i]);
+  }
+
+  std::vector<SDL_FPoint> v;
+  while (!s.empty())
+  {
+    SDL_FPoint p = s.top();
+    v.push_back(p);
+    s.pop();
+  }
+
+  return v;
+}
+
+static void merge_points(std::vector<SDL_FPoint> &points, std::vector<SDL_FPoint> to_merge, double eps = 0.001)
+{
+  for (auto merge_point : to_merge)
+  {
+    bool exists = false;
+    int i = 0;
+    while (!exists && i < points.size())
+    {
+      exists = squared_dist(merge_point, points[i]) <= eps;
+      ++i;
+    }
+    if (!exists)
+    {
+      points.push_back(merge_point);
+    }
+  }
+}
+
+std::vector<SDL_FPoint> joined_convex_hull(std::vector<std::vector<SDL_FPoint>> object)
+{
+  std::vector<SDL_FPoint> points = {};
+  for (auto part : object)
+  {
+    auto hull = convex_hull2(part);
+    // std::cout << part.size() << std::endl;
+    merge_points(points, hull);
+    for (auto point : hull)
+    {
+      points.push_back(point);
+    }
+  }
+  return points;
+}
