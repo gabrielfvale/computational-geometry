@@ -1,10 +1,12 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <sstream>
 #include <tuple>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "OBJLoader.h"
 #include "ConvexHull.h"
@@ -33,12 +35,18 @@ int main(int args, char *argv[])
     return 1;
   }
 
+  if (TTF_Init() < 0)
+  {
+    std::cerr << "TTF_Init() Error: " << TTF_GetError() << std::endl;
+  }
+
   // Don't stop window compositor
   SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Texture *img = NULL;
+  TTF_Font *font;
   int iw, ih;
 
   // Create window
@@ -64,6 +72,7 @@ int main(int args, char *argv[])
     return 1;
   }
 
+  // Load image
   img = IMG_LoadTexture(renderer, IMG_PATH);
   SDL_QueryTexture(img, NULL, NULL, &iw, &ih); // get the width and height of the texture
   SDL_Rect texr;
@@ -71,6 +80,11 @@ int main(int args, char *argv[])
   texr.y = 0;
   texr.w = iw;
   texr.h = ih;
+
+  // Load font
+  font = TTF_OpenFont("fonts/OpenSans-Regular.ttf", 16);
+  SDL_Surface *text1;
+  SDL_Surface *text2;
 
   SDL_FPoint *points;
   int size;
@@ -84,6 +98,25 @@ int main(int args, char *argv[])
   std::cout << "Loaded: " << filename << std::endl;
   std::cout << "Points: " << size << std::endl;
   std::cout << "Convex Hull Points: " << hull_size << std::endl;
+
+  std::ostringstream oss;
+  oss << "Points: " << size;
+  std::string top_text = oss.str();
+  oss.str("");
+  oss << "Convex Hull: " << hull_size;
+  std::string bottom_text = oss.str();
+
+  // Create text to display
+  text1 = TTF_RenderText_Solid(font, top_text.c_str(), {255, 255, 255});
+  text2 = TTF_RenderText_Solid(font, bottom_text.c_str(), {255, 255, 255});
+  SDL_Texture *text1_texture;
+  SDL_Texture *text2_texture;
+
+  text1_texture = SDL_CreateTextureFromSurface(renderer, text1);
+  text2_texture = SDL_CreateTextureFromSurface(renderer, text2);
+
+  SDL_Rect text1_dest = {0, 0, text1->w, text1->h};
+  SDL_Rect text2_dest = {0, text1->h, text2->w, text2->h};
 
   SDL_Event event;
   bool quit = false;
@@ -128,27 +161,33 @@ int main(int args, char *argv[])
       SDL_RenderCopy(renderer, img, NULL, &texr);
     }
 
+    SDL_RenderCopy(renderer, text1_texture, NULL, &text1_dest);
+    SDL_RenderCopy(renderer, text2_texture, NULL, &text2_dest);
+
     // Set color of renderer
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     // Draw mesh points
-    SDL_RenderDrawPointsF(renderer, points, size);
+    // SDL_RenderDrawPointsF(renderer, points, size);
+    for (int i = 0; i < size; ++i)
+    {
+      // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
 
-    // Render wireframe
-    // if (display_wireframe)
-    // {
-    //   for (int i = 0; i < faces.size(); ++i)
-    //   {
-    //     int count = faces[i].size();
-    //     for (int j = 0; j < count - 1; ++j)
-    //     {
-    //       SDL_RenderDrawLine(renderer, points[j].x, points[j].y, points[j + 1].x, points[j + 1].y);
-    //     }
-    //     SDL_RenderDrawLine(renderer, points[count - 1].x, points[count - 1].y, points[0].x, points[0].y);
-    //   }
-    // }
+      // Render extra points around for visibility
+      // Top
+      SDL_RenderDrawPointF(renderer, points[i].x - 1, points[i].y - 1);
+      SDL_RenderDrawPointF(renderer, points[i].x, points[i].y - 1);
+      SDL_RenderDrawPointF(renderer, points[i].x + 1, points[i].y - 1);
+      // Bottom
+      SDL_RenderDrawPointF(renderer, points[i].x - 1, points[i].y + 1);
+      SDL_RenderDrawPointF(renderer, points[i].x, points[i].y + 1);
+      SDL_RenderDrawPointF(renderer, points[i].x + 1, points[i].y + 1);
+      // Sides
+      SDL_RenderDrawPointF(renderer, points[i].x - 1, points[i].y);
+      SDL_RenderDrawPointF(renderer, points[i].x + 1, points[i].y);
+    }
 
-    if (display_hull)
+    if (display_hull && hull_size > 0)
     {
       SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
       SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
@@ -167,6 +206,10 @@ int main(int args, char *argv[])
   }
 
   // Clean Up
+  SDL_FreeSurface(text1);
+  SDL_FreeSurface(text2);
+  SDL_DestroyTexture(text1_texture);
+  SDL_DestroyTexture(text2_texture);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
