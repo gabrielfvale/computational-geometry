@@ -195,18 +195,15 @@ static void merge_points(std::vector<SDL_FPoint> &points, std::vector<SDL_FPoint
   }
 }
 
-std::vector<SDL_FPoint> joined_convex_hull(std::vector<std::vector<SDL_FPoint>> object)
+std::vector<std::vector<SDL_FPoint>> joined_convex_hull(std::vector<std::vector<SDL_FPoint>> object)
 {
-  std::vector<SDL_FPoint> points = {};
+  std::vector<std::vector<SDL_FPoint>> hulls = {};
   for (auto part : object)
   {
     auto hull = convex_hull2(part);
     // std::cout << part.size() << std::endl;
-    merge_points(points, hull);
-    for (auto point : hull)
-    {
-      points.push_back(point);
-    }
+    // merge_points(points, hull);
+    hulls.push_back(hull);
   }
-  return points;
+  return hulls;
 }

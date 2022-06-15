@@ -16,6 +16,7 @@ static std::vector<std::vector<SDL_FPoint>> load_parts(const char *file_name, in
   std::ifstream in_file(file_name);
   std::string line = "";
   std::string prefix = "";
+  std::string part = "";
   SDL_FPoint temp;
   int temp_ind;
 
@@ -39,12 +40,14 @@ static std::vector<std::vector<SDL_FPoint>> load_parts(const char *file_name, in
     std::string coordx = "";
     std::string coordy = "";
 
-    if (prefix == "o" && v.size() > 0)
-    {
-      parts.push_back(v);
-      v.clear();
-    }
-    else if (prefix == "v")
+    // if (prefix == "o" && v.size() > 0)
+    // {
+    //   ss >> part;
+    //   std::cout << part << std::endl;
+    //   parts.push_back(v);
+    //   v.clear();
+    // }
+    if (prefix == "v")
     {
       ss >> coordx >> coordy;
       temp.x = std::stof(coordx) + half_w;
@@ -54,6 +57,11 @@ static std::vector<std::vector<SDL_FPoint>> load_parts(const char *file_name, in
     }
     else
     {
+      if (v.size() > 0)
+      {
+        parts.push_back(v);
+        v.clear();
+      }
       continue;
     }
   }

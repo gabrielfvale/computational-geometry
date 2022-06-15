@@ -11,7 +11,7 @@
 #include "OBJLoader.h"
 #include "ConvexHull.h"
 
-#define IMG_PATH "objects/Apollo_white.png"
+#define IMG_PATH "assets/Apollo_white.png"
 
 int main(int args, char *argv[])
 {
@@ -86,26 +86,21 @@ int main(int args, char *argv[])
   SDL_Surface *text1;
   SDL_Surface *text2;
 
-  SDL_FPoint *points;
-  int size;
-  std::tie(points, size) = load_obj(filename, windowWidth, windowHeight);
-  std::vector<std::vector<SDL_FPoint>> object = load_parts(filename, windowWidth, windowHeight);
+  int size = 1;
 
-  SDL_FPoint *hull_points;
-  int hull_size;
-  std::tie(hull_points, hull_size) = convex_hull(points, size);
-  std::vector<SDL_FPoint> test = joined_convex_hull(object);
+  std::vector<std::vector<SDL_FPoint>> object = load_parts(filename, windowWidth, windowHeight);
+  std::vector<std::vector<SDL_FPoint>> test = joined_convex_hull(object);
 
   std::cout << "Loaded: " << filename << std::endl;
-  std::cout << "Points: " << size << std::endl;
-  std::cout << "Convex Hull Points: " << hull_size << std::endl;
+  // std::cout << "Points: " << size << std::endl;
+  // std::cout << "Convex Hull Points: " << hull_size << std::endl;
   std::cout << "Size: " << test.size() << std::endl;
 
   std::ostringstream oss;
   oss << "Points: " << size;
   std::string top_text = oss.str();
   oss.str("");
-  oss << "Convex Hull: " << hull_size;
+  oss << "Convex Hull: " << size;
   std::string bottom_text = oss.str();
 
   // Create text to display
@@ -124,7 +119,7 @@ int main(int args, char *argv[])
   bool quit = false;
   bool display_hull = false;
   bool display_wireframe = false;
-  bool display_image = true;
+  bool display_image = false;
 
   while (!quit)
   {
@@ -157,7 +152,7 @@ int main(int args, char *argv[])
     // Clear the screen
     SDL_RenderClear(renderer);
 
-    if (display_image && strcmp(filename, "objects/Apollo.obj") == 0)
+    if (display_image)
     {
       SDL_SetTextureAlphaMod(img, 32);
       SDL_RenderCopy(renderer, img, NULL, &texr);
@@ -172,38 +167,42 @@ int main(int args, char *argv[])
     // Draw mesh points
     // SDL_RenderDrawPointsF(renderer, points, size);
 
-    // for (auto part : object)
-    // {
-    for (int i = 0; i < test.size(); ++i)
+    for (int i = 0; i < object.size(); ++i)
     {
-      // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
+      for (int j = 0; j < object[i].size(); ++j)
+      {
 
-      // Render extra points around for visibility
-      // Top
-      SDL_RenderDrawPointF(renderer, test[i].x - 1, test[i].y - 1);
-      SDL_RenderDrawPointF(renderer, test[i].x, test[i].y - 1);
-      SDL_RenderDrawPointF(renderer, test[i].x + 1, test[i].y - 1);
-      // Bottom
-      SDL_RenderDrawPointF(renderer, test[i].x - 1, test[i].y + 1);
-      SDL_RenderDrawPointF(renderer, test[i].x, test[i].y + 1);
-      SDL_RenderDrawPointF(renderer, test[i].x + 1, test[i].y + 1);
-      // Sides
-      SDL_RenderDrawPointF(renderer, test[i].x - 1, test[i].y);
-      SDL_RenderDrawPointF(renderer, test[i].x + 1, test[i].y);
+        // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
+
+        // Render extra points around for visibility
+        // Top
+        SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y - 1);
+        SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y - 1);
+        SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y - 1);
+        // Bottom
+        SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y + 1);
+        SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y + 1);
+        SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y + 1);
+        // Sides
+        SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y);
+        SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y);
+      }
     }
-    // }
 
-    if (display_hull && hull_size > 0)
+    if (display_hull && test.size() > 0)
     {
       // SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
       // SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
 
       SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-      for (int i = 0; i < hull_size - 1; ++i)
+      for (int i = 0; i < test.size(); ++i)
       {
-        SDL_RenderDrawLine(renderer, test[i].x, test[i].y, test[i + 1].x, test[i + 1].y);
+        for (int j = 0; j < test[i].size() - 1; ++j)
+        {
+          SDL_RenderDrawLine(renderer, test[i][j].x, test[i][j].y, test[i][j + 1].x, test[i][j + 1].y);
+        }
+        SDL_RenderDrawLine(renderer, test[i][test[i].size() - 1].x, test[i][test[i].size() - 1].y, test[i][0].x, test[i][0].y);
       }
-      SDL_RenderDrawLine(renderer, test[hull_size - 1].x, test[hull_size - 1].y, test[0].x, test[0].y);
     }
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
