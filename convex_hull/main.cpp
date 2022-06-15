@@ -8,7 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "OBJLoader.h"
+#include "ObjectIO.h"
 #include "ConvexHull.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
@@ -23,7 +23,9 @@ int main(int args, char *argv[])
   }
 
   const char *filename = argv[1];
-  const std::string title = "Convex Hull: " + std::string(filename);
+  std::string path(filename);
+  std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
+  const std::string title = "Convex Hull: " + base_filename;
 
   const int windowWidth = 640;
   const int windowHeight = 480;
@@ -88,7 +90,7 @@ int main(int args, char *argv[])
 
   int size = 1;
 
-  std::vector<std::vector<SDL_FPoint>> object = load_parts(filename, windowWidth, windowHeight);
+  std::vector<std::vector<SDL_FPoint>> object = load_obj(filename, windowWidth, windowHeight);
   std::vector<std::vector<SDL_FPoint>> test = joined_convex_hull(object);
 
   std::cout << "Loaded: " << filename << std::endl;
@@ -137,7 +139,7 @@ int main(int args, char *argv[])
           display_hull = !display_hull;
           break;
         case SDLK_w:
-          display_wireframe = !display_wireframe;
+          write_obj(test, base_filename, windowWidth, windowHeight);
           break;
         case SDLK_i:
           display_image = !display_image;

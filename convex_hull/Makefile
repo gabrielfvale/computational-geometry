@@ -1,4 +1,4 @@
-CC=g++
+CC=g++ -std=c++11
 CFLAGS=-g -lSDL2 -lSDL2_image -lSDL2_ttf
 
 TARGET = program.exe

@@ -2,3 +2,5 @@
 *.mtl
 *.out
 *.exe
+
+out/*
