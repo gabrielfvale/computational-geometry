@@ -88,21 +88,25 @@ int main(int args, char *argv[])
   SDL_Surface *text1;
   SDL_Surface *text2;
 
-  int size = 1;
-
   std::vector<std::vector<SDL_FPoint>> object = load_obj(filename, windowWidth, windowHeight);
   std::vector<std::vector<SDL_FPoint>> test = joined_convex_hull(object);
+  std::vector<SDL_FPoint> hull = hull_cloud(object);
+
+  int size = 0;
+  for (int k = 0; k < object.size(); ++k)
+  {
+    size += object[k].size();
+  }
 
   std::cout << "Loaded: " << filename << std::endl;
-  // std::cout << "Points: " << size << std::endl;
-  // std::cout << "Convex Hull Points: " << hull_size << std::endl;
-  std::cout << "Size: " << test.size() << std::endl;
+  std::cout << "Points: " << size << std::endl;
+  std::cout << "Convex Hull: " << hull.size() << std::endl;
 
   std::ostringstream oss;
-  oss << "Points: " << size;
+  oss << "c: Toggle hull";
   std::string top_text = oss.str();
   oss.str("");
-  oss << "Convex Hull: " << size;
+  oss << "w: Write OBJ";
   std::string bottom_text = oss.str();
 
   // Create text to display
@@ -169,27 +173,44 @@ int main(int args, char *argv[])
     // Draw mesh points
     // SDL_RenderDrawPointsF(renderer, points, size);
 
-    for (int i = 0; i < object.size(); ++i)
+    for (int i = 0; i < hull.size(); ++i)
     {
-      for (int j = 0; j < object[i].size(); ++j)
-      {
 
-        // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
-
-        // Render extra points around for visibility
-        // Top
-        SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y - 1);
-        SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y - 1);
-        SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y - 1);
-        // Bottom
-        SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y + 1);
-        SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y + 1);
-        SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y + 1);
-        // Sides
-        SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y);
-        SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y);
-      }
+      // Render extra points around for visibility
+      // Top
+      SDL_RenderDrawPointF(renderer, hull[i].x - 1, hull[i].y - 1);
+      SDL_RenderDrawPointF(renderer, hull[i].x, hull[i].y - 1);
+      SDL_RenderDrawPointF(renderer, hull[i].x + 1, hull[i].y - 1);
+      // Bottom
+      SDL_RenderDrawPointF(renderer, hull[i].x - 1, hull[i].y + 1);
+      SDL_RenderDrawPointF(renderer, hull[i].x, hull[i].y + 1);
+      SDL_RenderDrawPointF(renderer, hull[i].x + 1, hull[i].y + 1);
+      // Sides
+      SDL_RenderDrawPointF(renderer, hull[i].x - 1, hull[i].y);
+      SDL_RenderDrawPointF(renderer, hull[i].x + 1, hull[i].y);
     }
+
+    // for (int i = 0; i < object.size(); ++i)
+    // {
+    //   for (int j = 0; j < object[i].size(); ++j)
+    //   {
+
+    //     // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
+
+    //     // Render extra points around for visibility
+    //     // Top
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y - 1);
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y - 1);
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y - 1);
+    //     // Bottom
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y + 1);
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y + 1);
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y + 1);
+    //     // Sides
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y);
+    //     SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y);
+    //   }
+    // }
 
     if (display_hull && test.size() > 0)
     {

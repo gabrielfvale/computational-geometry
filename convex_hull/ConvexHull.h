@@ -179,18 +179,21 @@ static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
 
 static void merge_points(std::vector<SDL_FPoint> &points, std::vector<SDL_FPoint> to_merge, double eps = 0.001)
 {
-  for (auto merge_point : to_merge)
+  for (int i = 0; i < to_merge.size(); ++i)
   {
     bool exists = false;
-    int i = 0;
-    while (!exists && i < points.size())
+    int j = 0;
+    while (!exists && j < points.size())
     {
-      exists = squared_dist(merge_point, points[i]) <= eps;
-      ++i;
+      if (i != j)
+      {
+        exists = squared_dist(to_merge[i], points[j]) <= eps;
+      }
+      ++j;
     }
     if (!exists)
     {
-      points.push_back(merge_point);
+      points.push_back(to_merge[i]);
     }
   }
 }
@@ -201,9 +204,19 @@ std::vector<std::vector<SDL_FPoint>> joined_convex_hull(std::vector<std::vector<
   for (auto part : object)
   {
     auto hull = convex_hull2(part);
-    // std::cout << part.size() << std::endl;
     // merge_points(points, hull);
     hulls.push_back(hull);
   }
   return hulls;
+}
+
+std::vector<SDL_FPoint> hull_cloud(std::vector<std::vector<SDL_FPoint>> object)
+{
+  std::vector<SDL_FPoint> points = {};
+  for (auto part : object)
+  {
+    auto hull = convex_hull2(part);
+    merge_points(points, hull);
+  }
+  return points;
 }
