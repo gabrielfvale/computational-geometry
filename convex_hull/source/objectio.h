@@ -10,7 +10,7 @@
 
 #include <SDL2/SDL.h>
 
-static std::vector<std::vector<SDL_FPoint>> load_obj(const char *file_name, int w, int h)
+static std::vector<std::vector<SDL_FPoint>> load_obj(const char *file_name)
 {
   std::stringstream ss;
   std::ifstream in_file(file_name);
@@ -22,9 +22,6 @@ static std::vector<std::vector<SDL_FPoint>> load_obj(const char *file_name, int 
 
   std::vector<std::vector<SDL_FPoint>> parts;
   std::vector<SDL_FPoint> v;
-
-  int half_w = w / 2;
-  int half_h = h / 2;
 
   if (!in_file.is_open())
   {
@@ -43,8 +40,8 @@ static std::vector<std::vector<SDL_FPoint>> load_obj(const char *file_name, int 
     if (prefix == "v")
     {
       ss >> coordx >> coordy;
-      temp.x = std::stof(coordx) + half_w;
-      temp.y = std::stof(coordy) * -1 + half_h;
+      temp.x = std::stof(coordx);
+      temp.y = std::stof(coordy);
 
       v.push_back(temp);
     }
@@ -116,7 +113,7 @@ static std::tuple<SDL_FPoint *, int> load_legacy(const char *file_name, int w, i
   return std::make_tuple(result, v.size());
 }
 
-static int write_obj(std::vector<std::vector<SDL_FPoint>> &object, std::string file_name, int w, int h)
+static int write_obj(std::vector<std::vector<SDL_FPoint>> &object, std::string file_name)
 {
   std::string out_path("out/");
   std::string path = out_path + file_name;
@@ -126,14 +123,11 @@ static int write_obj(std::vector<std::vector<SDL_FPoint>> &object, std::string f
   std::ofstream output;
   output.open(path.c_str());
 
-  int half_w = w / 2;
-  int half_h = h / 2;
-
   for (auto part : object)
   {
     for (auto point : part)
     {
-      output << "v " << point.x - half_w << " " << (point.y - half_h) * -1 << " "
+      output << "v " << point.x << " " << point.y << " "
              << "0.0\n";
     }
     output << "s\n";

@@ -6,7 +6,6 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL_opengl.h>
-#include <GL/glu.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -38,7 +37,7 @@ int main(int args, char *argv[])
 
   Display display(WINDOW_WIDTH, WINDOW_HEIGHT, title);
 
-  vector<vector<SDL_FPoint>> object = load_obj(filename, WINDOW_WIDTH, WINDOW_HEIGHT);
+  vector<vector<SDL_FPoint>> object = load_obj(filename);
   vector<vector<SDL_FPoint>> test = joined_convex_hull(object);
 
   Geometry geo = Geometry(test);
@@ -46,14 +45,8 @@ int main(int args, char *argv[])
   while (!display.IsClosed())
   {
     display.Clear();
-
-    glPointSize(4);
-    glBegin(GL_POLYGON);
-    glColor3f(1, 1, 1);
-    glVertex2f(-120, -60);
-    glVertex2f(0.0, -60);
-    glVertex2f(0.0, 60);
-    glEnd();
+    geo.renderPoints();
+    geo.renderEdges();
     display.Update();
   }
 
