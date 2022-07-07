@@ -53,8 +53,8 @@ int main()
   // Use sorting algorithms
   vector<Point> graham_res = graham(example, example.size());
   vector<Point> jarvis_res = jarvis(example, example.size());
-  // vector<Point> quick_res = quickHull(example, example.size());
-  // vector<Point> merge_res = mergeHull(example);
+  vector<Point> quick_res = quickHull(example, example.size());
+  vector<Point> merge_res = mergeHull(example);
 
   cout << "Graham:" << endl;
   printhull(graham_res);
@@ -64,13 +64,13 @@ int main()
   printhull(jarvis_res);
   cout << endl;
 
-  // cout << "Quickhull:" << endl;
-  // printhull(quick_res);
-  // cout << endl;
+  cout << "Quickhull:" << endl;
+  printhull(quick_res);
+  cout << endl;
 
-  // cout << "Mergehull:" << endl;
-  // printhull(merge_res);
-  // cout << endl;
+  cout << "Mergehull:" << endl;
+  printhull(merge_res);
+  cout << endl;
 
   for (int p = 1; p <= 3; ++p)
   {

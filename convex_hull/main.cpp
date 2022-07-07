@@ -10,6 +10,7 @@
 
 #include "ObjectIO.h"
 #include "ConvexHull.h"
+#include "Geometry.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
 
@@ -92,6 +93,8 @@ int main(int args, char *argv[])
   std::vector<std::vector<SDL_FPoint>> test = joined_convex_hull(object);
   std::vector<SDL_FPoint> hull = hull_cloud(object);
 
+  Geometry geo = Geometry(test);
+
   int size = 0;
   for (int k = 0; k < object.size(); ++k)
   {
@@ -173,44 +176,21 @@ int main(int args, char *argv[])
     // Draw mesh points
     // SDL_RenderDrawPointsF(renderer, points, size);
 
-    for (int i = 0; i < hull.size(); ++i)
+    for (auto p : geo.points)
     {
-
       // Render extra points around for visibility
       // Top
-      SDL_RenderDrawPointF(renderer, hull[i].x - 1, hull[i].y - 1);
-      SDL_RenderDrawPointF(renderer, hull[i].x, hull[i].y - 1);
-      SDL_RenderDrawPointF(renderer, hull[i].x + 1, hull[i].y - 1);
+      SDL_RenderDrawPointF(renderer, p.x - 1, p.y - 1);
+      SDL_RenderDrawPointF(renderer, p.x, p.y - 1);
+      SDL_RenderDrawPointF(renderer, p.x + 1, p.y - 1);
       // Bottom
-      SDL_RenderDrawPointF(renderer, hull[i].x - 1, hull[i].y + 1);
-      SDL_RenderDrawPointF(renderer, hull[i].x, hull[i].y + 1);
-      SDL_RenderDrawPointF(renderer, hull[i].x + 1, hull[i].y + 1);
+      SDL_RenderDrawPointF(renderer, p.x - 1, p.y + 1);
+      SDL_RenderDrawPointF(renderer, p.x, p.y + 1);
+      SDL_RenderDrawPointF(renderer, p.x + 1, p.y + 1);
       // Sides
-      SDL_RenderDrawPointF(renderer, hull[i].x - 1, hull[i].y);
-      SDL_RenderDrawPointF(renderer, hull[i].x + 1, hull[i].y);
+      SDL_RenderDrawPointF(renderer, p.x - 1, p.y);
+      SDL_RenderDrawPointF(renderer, p.x + 1, p.y);
     }
-
-    // for (int i = 0; i < object.size(); ++i)
-    // {
-    //   for (int j = 0; j < object[i].size(); ++j)
-    //   {
-
-    //     // SDL_RenderDrawPointF(renderer, points[i].x, points[i].y);
-
-    //     // Render extra points around for visibility
-    //     // Top
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y - 1);
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y - 1);
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y - 1);
-    //     // Bottom
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y + 1);
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x, object[i][j].y + 1);
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y + 1);
-    //     // Sides
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x - 1, object[i][j].y);
-    //     SDL_RenderDrawPointF(renderer, object[i][j].x + 1, object[i][j].y);
-    //   }
-    // }
 
     if (display_hull && test.size() > 0)
     {
@@ -218,13 +198,18 @@ int main(int args, char *argv[])
       // SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
 
       SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-      for (int i = 0; i < test.size(); ++i)
+      // for (int i = 0; i < test.size(); ++i)
+      // {
+      //   for (int j = 0; j < test[i].size() - 1; ++j)
+      //   {
+      //     SDL_RenderDrawLine(renderer, test[i][j].x, test[i][j].y, test[i][j + 1].x, test[i][j + 1].y);
+      //   }
+      //   SDL_RenderDrawLine(renderer, test[i][test[i].size() - 1].x, test[i][test[i].size() - 1].y, test[i][0].x, test[i][0].y);
+      // }
+
+      for (auto edge : geo.edges)
       {
-        for (int j = 0; j < test[i].size() - 1; ++j)
-        {
-          SDL_RenderDrawLine(renderer, test[i][j].x, test[i][j].y, test[i][j + 1].x, test[i][j + 1].y);
-        }
-        SDL_RenderDrawLine(renderer, test[i][test[i].size() - 1].x, test[i][test[i].size() - 1].y, test[i][0].x, test[i][0].y);
+        SDL_RenderDrawLine(renderer, geo.points[edge.first].x, geo.points[edge.first].y, geo.points[edge.second].x, geo.points[edge.second].y);
       }
     }
 
