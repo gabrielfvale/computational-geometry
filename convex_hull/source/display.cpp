@@ -32,10 +32,21 @@ Display::Display(int width, int height, const std::string &title)
     return;
   }
 
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
   m_glContext = SDL_GL_CreateContext(m_window);
 
-  glClearColor(1.f, 1.f, 1.f, 0.f);
+  float half_w = width / 2;
+  float half_h = height / 2;
+
+  glClearColor(0.f, 0.f, 0.f, 0.f);
   glViewport(0, 0, width, height);
+
+  // Set orthographic projection
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(-half_w, half_w, -half_h, half_h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
 }
 
 Display::~Display()

@@ -17,26 +17,43 @@
 #include "display.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+using namespace std;
 
 int main(int args, char *argv[])
 {
 
   if (args < 2)
   {
-    std::cerr << "main() Error: OBJ filename not provided" << std::endl;
+    cerr << "main() Error: OBJ filename not provided" << endl;
     return 1;
   }
 
   const char *filename = argv[1];
-  std::string path(filename);
-  std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
-  const std::string title = "Convex Hull: " + base_filename;
+  string path(filename);
+  string base_filename = path.substr(path.find_last_of("/\\") + 1);
+  const string title = "Convex Hull: " + base_filename;
 
-  Display display(640, 480, title);
+  Display display(WINDOW_WIDTH, WINDOW_HEIGHT, title);
+
+  vector<vector<SDL_FPoint>> object = load_obj(filename, WINDOW_WIDTH, WINDOW_HEIGHT);
+  vector<vector<SDL_FPoint>> test = joined_convex_hull(object);
+
+  Geometry geo = Geometry(test);
 
   while (!display.IsClosed())
   {
     display.Clear();
+
+    glPointSize(4);
+    glBegin(GL_POLYGON);
+    glColor3f(1, 1, 1);
+    glVertex2f(-120, -60);
+    glVertex2f(0.0, -60);
+    glVertex2f(0.0, 60);
+    glEnd();
     display.Update();
   }
 
