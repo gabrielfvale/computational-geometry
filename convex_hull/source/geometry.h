@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 
 #include <stdio.h>
 #include <vector>
@@ -115,3 +116,5 @@ public:
     edges.push_back(make_pair(points.size() - 1, 0));
   };
 };
+
+#endif

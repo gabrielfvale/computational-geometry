@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONVEX_HULL_H
+#define CONVEX_HULL_H
 
 #include <iostream>
 #include <stack>
@@ -9,7 +10,7 @@
 #include <SDL2/SDL.h>
 
 SDL_FPoint p0;
-SDL_FPoint second_top(std::stack<SDL_FPoint> &s)
+SDL_FPoint secondTop(std::stack<SDL_FPoint> &s)
 {
   SDL_FPoint temp_point = s.top();
   s.pop();
@@ -25,7 +26,7 @@ void swap(SDL_FPoint &p1, SDL_FPoint &p2)
   p2 = temp;
 }
 
-int squared_dist(SDL_FPoint p1, SDL_FPoint p2)
+int squaredDist(SDL_FPoint p1, SDL_FPoint p2)
 {
   return ((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
@@ -46,7 +47,7 @@ int comp(const void *point1, const void *point2)
   SDL_FPoint *p2 = (SDL_FPoint *)point2;
   int ori = orientation(p0, *p1, *p2);
   if (ori == 0)
-    return (squared_dist(p0, *p2) >= squared_dist(p0, *p1)) ? -1 : 1;
+    return (squaredDist(p0, *p2) >= squaredDist(p0, *p1)) ? -1 : 1;
   return (ori == 2) ? -1 : 1;
 }
 
@@ -95,7 +96,7 @@ static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
 
   for (int i = 3; i < n; ++i)
   {
-    while (s.size() > 1 && orientation(second_top(s), s.top(), points[i]) != 2)
+    while (s.size() > 1 && orientation(secondTop(s), s.top(), points[i]) != 2)
       s.pop();
     s.push(points[i]);
   }
@@ -163,7 +164,7 @@ static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
 
   for (int i = 3; i < n; ++i)
   {
-    while (s.size() > 1 && orientation(second_top(s), s.top(), points[i]) != 2)
+    while (s.size() > 1 && orientation(secondTop(s), s.top(), points[i]) != 2)
       s.pop();
     s.push(points[i]);
   }
@@ -189,7 +190,7 @@ static void merge_points(std::vector<SDL_FPoint> &points, std::vector<SDL_FPoint
     {
       if (i != j)
       {
-        exists = squared_dist(to_merge[i], points[j]) <= eps;
+        exists = squaredDist(to_merge[i], points[j]) <= eps;
       }
       ++j;
     }
@@ -222,3 +223,5 @@ std::vector<SDL_FPoint> hull_cloud(std::vector<std::vector<SDL_FPoint>> object)
   }
   return points;
 }
+
+#endif
