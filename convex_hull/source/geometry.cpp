@@ -63,7 +63,7 @@ Geometry::Geometry(vector<vector<SDL_FPoint>> &hulls, double eps)
       p0.y = points[0].y;
 
       // Sort by counter-clockwise
-      if (comp(p0, points[last - 1], points[last]))
+      if (comp(p0, points[last], points[last - 1]))
       {
         swap(points[last - 1], points[last]);
       }
