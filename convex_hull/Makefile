@@ -21,7 +21,8 @@ CC_FLAGS=-std=c++11 \
 # Lib dependencies
 DEPS=-lSDL2       \
 		 -lSDL2_image \
-		 -lSDL2_ttf
+		 -lSDL2_ttf   \
+		 -lGL         \
 
 RM = rm -rf
 
@@ -49,5 +50,7 @@ objFolder:
 clean:
 	@ rm -rf ./objects/*.o $(PROJ_NAME) *~
 	@ rmdir objects
+
+fresh: clean all
 
 .PHONY: all clean

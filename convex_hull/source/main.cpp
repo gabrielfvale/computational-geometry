@@ -14,6 +14,7 @@
 #include "objectio.h"
 #include "convexhull.h"
 #include "geometry.h"
+#include "display.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
 
@@ -26,216 +27,18 @@ int main(int args, char *argv[])
     return 1;
   }
 
-  int flags = 0;
-
   const char *filename = argv[1];
   std::string path(filename);
   std::string base_filename = path.substr(path.find_last_of("/\\") + 1);
   const std::string title = "Convex Hull: " + base_filename;
 
-  const int windowWidth = 640;
-  const int windowHeight = 480;
+  Display display(640, 480, title);
 
-  // Init SDL
-  if (SDL_Init(SDL_INIT_VIDEO) != 0)
+  while (!display.IsClosed())
   {
-    std::cerr << "SDL_Init() Error: " << SDL_GetError() << std::endl;
-    return 1;
+    display.Clear();
+    display.Update();
   }
-
-  if (TTF_Init() < 0)
-  {
-    std::cerr << "TTF_Init() Error: " << TTF_GetError() << std::endl;
-  }
-
-  // Don't stop window compositor
-  SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-
-  SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-  SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-  SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-  SDL_Window *window;
-  SDL_Renderer *renderer;
-  SDL_Texture *img = NULL;
-  TTF_Font *font;
-  int iw, ih;
-
-  // Create window
-  window = SDL_CreateWindow(
-      title.c_str(),
-      SDL_WINDOWPOS_CENTERED,
-      SDL_WINDOWPOS_CENTERED,
-      windowWidth, windowHeight,
-      SDL_WINDOW_OPENGL);
-  if (window == nullptr)
-  {
-    std::cerr << "SDL_CreateWindow() Error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return 1;
-  }
-
-  // Create renderer
-  renderer = SDL_CreateRenderer(window, -1, 0);
-  if (renderer == nullptr)
-  {
-    std::cerr << "SDL_CreateRenderer() Error: " << SDL_GetError() << std::endl;
-    SDL_DestroyWindow(window);
-    return 1;
-  }
-
-  // Load image
-  img = IMG_LoadTexture(renderer, IMG_PATH);
-  SDL_QueryTexture(img, NULL, NULL, &iw, &ih); // get the width and height of the texture
-  SDL_Rect texr;
-  texr.x = 0;
-  texr.y = 0;
-  texr.w = iw;
-  texr.h = ih;
-
-  // Load font
-  font = TTF_OpenFont("fonts/OpenSans-Regular.ttf", 16);
-  SDL_Surface *text1;
-  SDL_Surface *text2;
-
-  std::vector<std::vector<SDL_FPoint>> object = load_obj(filename, windowWidth, windowHeight);
-  std::vector<std::vector<SDL_FPoint>> test = joined_convex_hull(object);
-  std::vector<SDL_FPoint> hull = hull_cloud(object);
-
-  Geometry geo = Geometry(test);
-
-  int size = 0;
-  for (int k = 0; k < object.size(); ++k)
-  {
-    size += object[k].size();
-  }
-
-  std::cout << "Loaded: " << filename << std::endl;
-  std::cout << "Points: " << size << std::endl;
-  std::cout << "Convex Hull: " << hull.size() << std::endl;
-
-  std::ostringstream oss;
-  oss << "c: Toggle hull";
-  std::string top_text = oss.str();
-  oss.str("");
-  oss << "w: Write OBJ";
-  std::string bottom_text = oss.str();
-
-  // Create text to display
-  text1 = TTF_RenderText_Solid(font, top_text.c_str(), {255, 255, 255});
-  text2 = TTF_RenderText_Solid(font, bottom_text.c_str(), {255, 255, 255});
-  SDL_Texture *text1_texture;
-  SDL_Texture *text2_texture;
-
-  text1_texture = SDL_CreateTextureFromSurface(renderer, text1);
-  text2_texture = SDL_CreateTextureFromSurface(renderer, text2);
-
-  SDL_Rect text1_dest = {0, 0, text1->w, text1->h};
-  SDL_Rect text2_dest = {0, text1->h, text2->w, text2->h};
-
-  SDL_Event event;
-  bool quit = false;
-  bool display_hull = false;
-  bool display_wireframe = false;
-  bool display_image = false;
-
-  while (!quit)
-  {
-    while (SDL_PollEvent(&event) != 0)
-    {
-      switch (event.type)
-      {
-      case SDL_QUIT:
-        quit = true;
-        break;
-      case SDL_KEYDOWN:
-        switch (event.key.keysym.sym)
-        {
-        case SDLK_c:
-          display_hull = !display_hull;
-          break;
-        case SDLK_w:
-          write_obj(test, base_filename, windowWidth, windowHeight);
-          break;
-        case SDLK_i:
-          display_image = !display_image;
-          break;
-        }
-        break;
-      default:
-        break;
-      }
-    }
-
-    // Clear the screen
-    SDL_RenderClear(renderer);
-
-    if (display_image)
-    {
-      SDL_SetTextureAlphaMod(img, 32);
-      SDL_RenderCopy(renderer, img, NULL, &texr);
-    }
-
-    SDL_RenderCopy(renderer, text1_texture, NULL, &text1_dest);
-    SDL_RenderCopy(renderer, text2_texture, NULL, &text2_dest);
-
-    // Set color of renderer
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-
-    // Draw mesh points
-    // SDL_RenderDrawPointsF(renderer, points, size);
-
-    for (auto p : geo.points)
-    {
-      // Render extra points around for visibility
-      // Top
-      SDL_RenderDrawPointF(renderer, p.x - 1, p.y - 1);
-      SDL_RenderDrawPointF(renderer, p.x, p.y - 1);
-      SDL_RenderDrawPointF(renderer, p.x + 1, p.y - 1);
-      // Bottom
-      SDL_RenderDrawPointF(renderer, p.x - 1, p.y + 1);
-      SDL_RenderDrawPointF(renderer, p.x, p.y + 1);
-      SDL_RenderDrawPointF(renderer, p.x + 1, p.y + 1);
-      // Sides
-      SDL_RenderDrawPointF(renderer, p.x - 1, p.y);
-      SDL_RenderDrawPointF(renderer, p.x + 1, p.y);
-    }
-
-    if (display_hull && test.size() > 0)
-    {
-      // SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-      // SDL_RenderDrawPointsF(renderer, hull_points, hull_size);
-
-      SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-      // for (int i = 0; i < test.size(); ++i)
-      // {
-      //   for (int j = 0; j < test[i].size() - 1; ++j)
-      //   {
-      //     SDL_RenderDrawLine(renderer, test[i][j].x, test[i][j].y, test[i][j + 1].x, test[i][j + 1].y);
-      //   }
-      //   SDL_RenderDrawLine(renderer, test[i][test[i].size() - 1].x, test[i][test[i].size() - 1].y, test[i][0].x, test[i][0].y);
-      // }
-
-      for (auto edge : geo.edges)
-      {
-        SDL_RenderDrawLine(renderer, geo.points[edge.first].x, geo.points[edge.first].y, geo.points[edge.second].x, geo.points[edge.second].y);
-      }
-    }
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-    SDL_RenderPresent(renderer);
-  }
-  // Clean Up
-  SDL_FreeSurface(text1);
-  SDL_FreeSurface(text2);
-  SDL_DestroyTexture(text1_texture);
-  SDL_DestroyTexture(text2_texture);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
 
   return 0;
 }

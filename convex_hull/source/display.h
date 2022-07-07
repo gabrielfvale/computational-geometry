@@ -7,7 +7,12 @@
 class Display
 {
 public:
+  int width;
+  int height;
   Display(int width, int height, const std::string &title);
+  void Clear();
+  void Update();
+  bool IsClosed();
   virtual ~Display();
 
 private:
