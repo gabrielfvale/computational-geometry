@@ -6,14 +6,14 @@ using namespace std;
 
 Geometry::Geometry() {}
 
-Geometry::Geometry(vector<vector<SDL_FPoint>> &hulls, double eps)
+Geometry::Geometry(vector<vector<Point>> &hulls, double eps)
 {
   if (hulls.size() == 0)
   {
     return;
   }
 
-  vector<SDL_FPoint> all_points = {};
+  vector<Point> all_points = {};
   for (auto hull : hulls)
     for (auto point : hull)
       all_points.push_back(point);
@@ -31,13 +31,13 @@ Geometry::Geometry(vector<vector<SDL_FPoint>> &hulls, double eps)
     min_y = points[1].y;
     swap(points[0], points[1]);
   }
-  SDL_FPoint p0 = points[0];
+  Point p0 = points[0];
 
-  for (int i = 1; i < all_points.size() - 1; ++i)
+  for (unsigned int i = 1; i < all_points.size() - 1; ++i)
   {
-    SDL_FPoint p1 = all_points[i];
+    Point p1 = all_points[i];
     bool exists = false;
-    for (SDL_FPoint p2 : points)
+    for (Point p2 : points)
     {
       double dist = Comparator::squared_dist(p1, p2);
       if (Comparator::squared_dist(p1, p2) < eps)
@@ -65,16 +65,11 @@ Geometry::Geometry(vector<vector<SDL_FPoint>> &hulls, double eps)
   // p0.y = points[0].y;
   sort(points.begin(), points.end(), Comparator(points[0]));
   // Add edges
-  for (int i = 0; i < points.size() - 1; ++i)
+  for (unsigned int i = 0; i < points.size() - 1; ++i)
   {
     edges.push_back(make_pair(i, i + 1));
   }
   edges.push_back(make_pair(points.size() - 1, 0));
-}
-
-void Geometry::out_point(SDL_FPoint &p)
-{
-  cout << "(" << p.x << ", " << p.y << ")" << endl;
 }
 
 void Geometry::renderPoints(GLfloat size)

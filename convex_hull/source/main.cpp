@@ -10,6 +10,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "point.h"
 #include "objectio.h"
 #include "convexhull.h"
 #include "geometry.h"
@@ -37,8 +38,8 @@ int main(int args, char *argv[])
 
   Display display(WINDOW_WIDTH, WINDOW_HEIGHT, title);
 
-  vector<vector<SDL_FPoint>> object = load_obj(filename);
-  vector<vector<SDL_FPoint>> test = joined_convex_hull(object);
+  vector<vector<Point>> object = load_obj(filename);
+  vector<vector<Point>> test = joined_convex_hull(object);
 
   Geometry geo = Geometry(test);
 

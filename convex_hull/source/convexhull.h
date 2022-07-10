@@ -7,31 +7,31 @@
 #include <vector>
 #include <tuple>
 
-#include <SDL2/SDL.h>
+#include "point.h"
 
-SDL_FPoint p0;
-SDL_FPoint secondTop(std::stack<SDL_FPoint> &s)
+Point p0;
+Point secondTop(std::stack<Point> &s)
 {
-  SDL_FPoint temp_point = s.top();
+  Point temp_point = s.top();
   s.pop();
-  SDL_FPoint res = s.top();
+  Point res = s.top();
   s.push(temp_point);
   return res;
 }
 
-void swap(SDL_FPoint &p1, SDL_FPoint &p2)
+void swap(Point &p1, Point &p2)
 {
-  SDL_FPoint temp = p1;
+  Point temp = p1;
   p1 = p2;
   p2 = temp;
 }
 
-int squaredDist(SDL_FPoint p1, SDL_FPoint p2)
+int squaredDist(Point p1, Point p2)
 {
   return ((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
 }
 
-int orientation(SDL_FPoint a, SDL_FPoint b, SDL_FPoint c)
+int orientation(Point a, Point b, Point c)
 {
   int value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
   // Colinear
@@ -43,17 +43,17 @@ int orientation(SDL_FPoint a, SDL_FPoint b, SDL_FPoint c)
 
 int comp(const void *point1, const void *point2)
 {
-  SDL_FPoint *p1 = (SDL_FPoint *)point1;
-  SDL_FPoint *p2 = (SDL_FPoint *)point2;
+  Point *p1 = (Point *)point1;
+  Point *p2 = (Point *)point2;
   int ori = orientation(p0, *p1, *p2);
   if (ori == 0)
     return (squaredDist(p0, *p2) >= squaredDist(p0, *p1)) ? -1 : 1;
   return (ori == 2) ? -1 : 1;
 }
 
-static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
+static std::tuple<Point *, int> convex_hull(Point points[], int size)
 {
-  std::vector<SDL_FPoint> convex_hull_points;
+  std::vector<Point> convex_hull_points;
 
   // Iterate over points to find bottom-most or left-most
   int min_y = points[0].y, min = 0;
@@ -72,7 +72,7 @@ static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
 
   // Sort
   p0 = points[0];
-  std::qsort(&points[1], size - 1, sizeof(SDL_FPoint), comp);
+  std::qsort(&points[1], size - 1, sizeof(Point), comp);
 
   int n = 1;
 
@@ -89,7 +89,7 @@ static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
     return std::make_tuple(nullptr, 0);
 
   // Otherwise continue
-  std::stack<SDL_FPoint> s;
+  std::stack<Point> s;
   s.push(points[0]);
   s.push(points[1]);
   s.push(points[2]);
@@ -101,26 +101,26 @@ static std::tuple<SDL_FPoint *, int> convex_hull(SDL_FPoint points[], int size)
     s.push(points[i]);
   }
 
-  std::vector<SDL_FPoint> v;
+  std::vector<Point> v;
   while (!s.empty())
   {
-    SDL_FPoint p = s.top();
+    Point p = s.top();
     v.push_back(p);
     s.pop();
   }
 
-  SDL_FPoint *result = new SDL_FPoint[v.size()];
-  memcpy(result, &v.front(), v.size() * sizeof(SDL_FPoint));
+  Point *result = new Point[v.size()];
+  memcpy(result, &v.front(), v.size() * sizeof(Point));
 
   return std::make_tuple(result, v.size());
 }
 
-static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
+static std::vector<Point> convex_hull2(std::vector<Point> input)
 {
-  std::vector<SDL_FPoint> convex_hull_points;
+  std::vector<Point> convex_hull_points;
 
-  SDL_FPoint *points = new SDL_FPoint[input.size()];
-  memcpy(points, &input.front(), input.size() * sizeof(SDL_FPoint));
+  Point *points = new Point[input.size()];
+  memcpy(points, &input.front(), input.size() * sizeof(Point));
   int size = input.size();
 
   // Iterate over points to find bottom-most or left-most
@@ -140,7 +140,7 @@ static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
 
   // Sort
   p0 = points[0];
-  std::qsort(&points[1], size - 1, sizeof(SDL_FPoint), comp);
+  std::qsort(&points[1], size - 1, sizeof(Point), comp);
 
   int n = 1;
 
@@ -157,7 +157,7 @@ static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
     return {};
 
   // Otherwise continue
-  std::stack<SDL_FPoint> s;
+  std::stack<Point> s;
   s.push(points[0]);
   s.push(points[1]);
   s.push(points[2]);
@@ -169,10 +169,10 @@ static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
     s.push(points[i]);
   }
 
-  std::vector<SDL_FPoint> v;
+  std::vector<Point> v;
   while (!s.empty())
   {
-    SDL_FPoint p = s.top();
+    Point p = s.top();
     v.push_back(p);
     s.pop();
   }
@@ -180,48 +180,15 @@ static std::vector<SDL_FPoint> convex_hull2(std::vector<SDL_FPoint> input)
   return v;
 }
 
-static void merge_points(std::vector<SDL_FPoint> &points, std::vector<SDL_FPoint> to_merge, double eps = 0.001)
+std::vector<std::vector<Point>> joined_convex_hull(std::vector<std::vector<Point>> object)
 {
-  for (int i = 0; i < to_merge.size(); ++i)
-  {
-    bool exists = false;
-    int j = 0;
-    while (!exists && j < points.size())
-    {
-      if (i != j)
-      {
-        exists = squaredDist(to_merge[i], points[j]) <= eps;
-      }
-      ++j;
-    }
-    if (!exists)
-    {
-      points.push_back(to_merge[i]);
-    }
-  }
-}
-
-std::vector<std::vector<SDL_FPoint>> joined_convex_hull(std::vector<std::vector<SDL_FPoint>> object)
-{
-  std::vector<std::vector<SDL_FPoint>> hulls = {};
+  std::vector<std::vector<Point>> hulls = {};
   for (auto part : object)
   {
     auto hull = convex_hull2(part);
-    // merge_points(points, hull);
     hulls.push_back(hull);
   }
   return hulls;
-}
-
-std::vector<SDL_FPoint> hull_cloud(std::vector<std::vector<SDL_FPoint>> object)
-{
-  std::vector<SDL_FPoint> points = {};
-  for (auto part : object)
-  {
-    auto hull = convex_hull2(part);
-    merge_points(points, hull);
-  }
-  return points;
 }
 
 #endif

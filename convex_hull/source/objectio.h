@@ -8,20 +8,20 @@
 #include <algorithm>
 #include <tuple>
 
-#include <SDL2/SDL.h>
+#include "point.h"
 
-static std::vector<std::vector<SDL_FPoint>> load_obj(const char *file_name)
+static std::vector<std::vector<Point>> load_obj(const char *file_name)
 {
   std::stringstream ss;
   std::ifstream in_file(file_name);
   std::string line = "";
   std::string prefix = "";
   std::string part = "";
-  SDL_FPoint temp;
+  Point temp;
   int temp_ind;
 
-  std::vector<std::vector<SDL_FPoint>> parts;
-  std::vector<SDL_FPoint> v;
+  std::vector<std::vector<Point>> parts;
+  std::vector<Point> v;
 
   if (!in_file.is_open())
   {
@@ -66,16 +66,16 @@ static std::vector<std::vector<SDL_FPoint>> load_obj(const char *file_name)
   return parts;
 }
 
-static std::tuple<SDL_FPoint *, int> load_legacy(const char *file_name, int w, int h)
+static std::tuple<Point *, int> load_legacy(const char *file_name, int w, int h)
 {
   std::stringstream ss;
   std::ifstream in_file(file_name);
   std::string line = "";
   std::string prefix = "";
-  SDL_FPoint temp;
+  Point temp;
   int temp_ind;
 
-  std::vector<SDL_FPoint> v;
+  std::vector<Point> v;
   int half_w = w / 2;
   int half_h = h / 2;
 
@@ -107,13 +107,13 @@ static std::tuple<SDL_FPoint *, int> load_legacy(const char *file_name, int w, i
     }
   }
 
-  SDL_FPoint *result = new SDL_FPoint[v.size()];
-  memcpy(result, &v.front(), v.size() * sizeof(SDL_FPoint));
+  Point *result = new Point[v.size()];
+  memcpy(result, &v.front(), v.size() * sizeof(Point));
 
   return std::make_tuple(result, v.size());
 }
 
-static int write_obj(std::vector<std::vector<SDL_FPoint>> &object, std::string file_name)
+static int write_obj(std::vector<std::vector<Point>> &object, std::string file_name)
 {
   std::string out_path("out/");
   std::string path = out_path + file_name;

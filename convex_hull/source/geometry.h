@@ -7,20 +7,22 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
+#include "point.h"
+
 using namespace std;
 
 struct Comparator
 {
-  SDL_FPoint p0;
+  Point p0;
 
-  Comparator(SDL_FPoint ref) : p0(ref) {}
+  Comparator(Point ref) : p0(ref) {}
 
-  static double squared_dist(SDL_FPoint &p1, SDL_FPoint &p2)
+  static double squared_dist(Point &p1, Point &p2)
   {
     return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
   }
 
-  int orientation(SDL_FPoint &a, SDL_FPoint &b, SDL_FPoint &c)
+  int orientation(Point &a, Point &b, Point &c)
   {
     int value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
     // Colinear
@@ -30,7 +32,7 @@ struct Comparator
     return (value > 0) ? 1 : 2;
   };
 
-  bool comp(SDL_FPoint &p0, SDL_FPoint &p1, SDL_FPoint &p2)
+  bool comp(Point &p0, Point &p1, Point &p2)
   {
     int ori = orientation(p0, p1, p2);
     if (ori == 0)
@@ -40,7 +42,7 @@ struct Comparator
     return (ori == 2) ? false : true;
   }
 
-  bool operator()(SDL_FPoint &p1, SDL_FPoint &p2)
+  bool operator()(Point &p1, Point &p2)
   {
     return comp(p0, p1, p2);
   }
@@ -49,14 +51,13 @@ struct Comparator
 class Geometry
 {
 private:
-  static SDL_FPoint p0;
-  static void out_point(SDL_FPoint &p);
+  static Point p0;
 
 public:
-  vector<SDL_FPoint> points = {};
+  vector<Point> points = {};
   vector<pair<int, int>> edges = {};
   Geometry();
-  Geometry(vector<vector<SDL_FPoint>> &hulls, double eps = 1);
+  Geometry(vector<vector<Point>> &hulls, double eps = 1);
   void renderPoints(GLfloat size = 2);
   void renderEdges();
   void renderPolygon();
