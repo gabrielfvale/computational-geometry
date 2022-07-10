@@ -1,4 +1,5 @@
 #include "geometry.h"
+#include <algorithm>
 #include <istream>
 
 using namespace std;
@@ -38,8 +39,8 @@ Geometry::Geometry(vector<vector<SDL_FPoint>> &hulls, double eps)
     bool exists = false;
     for (SDL_FPoint p2 : points)
     {
-      double dist = squared_dist(p1, p2);
-      if (squared_dist(p1, p2) < eps)
+      double dist = Comparator::squared_dist(p1, p2);
+      if (Comparator::squared_dist(p1, p2) < eps)
       {
         exists = true;
         break;
@@ -54,21 +55,15 @@ Geometry::Geometry(vector<vector<SDL_FPoint>> &hulls, double eps)
       int y = points[last].y;
       if ((y < min_y) || (min_y == y) && points[last].x < points[0].x)
       {
-
         min_y = points[last].y;
         swap(points[0], points[last]);
       }
-      // Set p0 to min_point
-      p0.x = points[0].x;
-      p0.y = points[0].y;
-
-      // Sort by counter-clockwise
-      if (comp(p0, points[last], points[last - 1]))
-      {
-        swap(points[last - 1], points[last]);
-      }
     }
   }
+  // Set p0 to min_point
+  // p0.x = points[0].x;
+  // p0.y = points[0].y;
+  sort(points.begin(), points.end(), Comparator(points[0]));
   // Add edges
   for (int i = 0; i < points.size() - 1; ++i)
   {
@@ -82,43 +77,18 @@ void Geometry::out_point(SDL_FPoint &p)
   cout << "(" << p.x << ", " << p.y << ")" << endl;
 }
 
-double Geometry::squared_dist(SDL_FPoint &p1, SDL_FPoint &p2)
-{
-  return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
-}
-
-int Geometry::orientation(SDL_FPoint &a, SDL_FPoint &b, SDL_FPoint &c)
-{
-  int value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
-  // Colinear
-  if (value == 0)
-    return 0;
-  // CW or CCW, respectively
-  return (value > 0) ? 1 : 2;
-};
-
-bool Geometry::comp(SDL_FPoint &p0, SDL_FPoint &p1, SDL_FPoint &p2)
-{
-  int ori = orientation(p0, p1, p2);
-  if (ori == 0)
-  {
-    cout << "they colinear" << endl;
-    return (squared_dist(p0, p2) >= squared_dist(p0, p1)) ? false : true;
-  }
-  return (ori == 2) ? false : true;
-}
-
 void Geometry::renderPoints(GLfloat size)
 {
   glPointSize(size);
   glBegin(GL_POINTS);
-  glColor3f(1, 1, 1);
+  glColor3f(1, 0, 0);
   for (auto point : points)
   {
     glVertex2f(point.x, point.y);
   }
   glEnd();
 }
+
 void Geometry::renderEdges()
 {
   glColor3f(1, 1, 1);
@@ -142,4 +112,12 @@ void Geometry::renderPolygon()
     glVertex2f(point.x, point.y);
   }
   glEnd();
+}
+
+void Geometry::render()
+{
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  renderPolygon();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  renderPoints(4.0);
 }

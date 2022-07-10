@@ -45,8 +45,7 @@ int main(int args, char *argv[])
   while (!display.IsClosed())
   {
     display.Clear();
-    geo.renderPoints();
-    geo.renderEdges();
+    geo.render();
     display.Update();
   }
 
