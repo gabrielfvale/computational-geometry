@@ -57,7 +57,7 @@ struct Edge
     this->vertices = make_pair(a, b);
     this->visited = false;
   };
-  bool pLiesIn(int i, vector<Point> &points, double eps = 0.001)
+  bool pLiesIn(int i, vector<Point> &points)
   {
     auto p = points[i];
     auto v1 = points[vertices.first];
@@ -78,8 +78,54 @@ struct Edge
     int dy1 = v2.y - v1.y;
     double epsilon = 0.003 * (dx1 * dx1 + dy1 * dy1);
 
-    return abs(dot) < eps;
+    return abs(dot) < 0.01;
   };
+  double pDist(int i, vector<Point> &points)
+  {
+    auto p = points[i];
+    auto v1 = points[vertices.first];
+    auto v2 = points[vertices.second];
+
+    double eps = 0.001;
+
+    double A = p.x - v1.x;
+    double B = p.y - v1.y;
+    double C = v2.x - v1.x;
+    double D = v2.y - v1.y;
+
+    double dot = A * C + B * D;
+    double len_sq = C * C + D * D;
+    double param = -1;
+    if (len_sq != 0)
+      param = dot / len_sq;
+
+    double xx, yy;
+
+    if (param < 0)
+    {
+      xx = v1.x;
+      yy = v1.y;
+    }
+    else if (param > 1)
+    {
+      xx = v2.x;
+      yy = v2.y;
+    }
+    else
+    {
+      xx = v1.x + param * C;
+      yy = v1.y + param * D;
+    }
+
+    double dx = p.x - xx;
+    double dy = p.y - yy;
+
+    return (dx * dx + dy * dy);
+  };
+  bool pLiesInByDist(int i, vector<Point> &points, double eps = 0.01)
+  {
+    return this->pDist(i, points) <= eps;
+  }
   bool sameEdge(Edge &e2, vector<Point> &points)
   {
     if (vertices.first == e2.vertices.first && vertices.second == e2.vertices.second)
