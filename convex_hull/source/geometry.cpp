@@ -2,10 +2,13 @@
 #include <algorithm>
 #include <istream>
 
+#include "hullbuffer.h"
+
 using namespace std;
 
 Geometry::Geometry() {}
 
+/*
 Geometry::Geometry(vector<vector<Point>> &hulls, double eps)
 {
   if (hulls.size() == 0)
@@ -89,22 +92,59 @@ Geometry::Geometry(vector<vector<Point>> &hulls, double eps)
     }
   }
 }
+*/
+Geometry::Geometry(const vector<vector<Point>> &p)
+{
+  for (auto v : p)
+  {
+    parts.push_back(v);
+  }
+}
+
+void Geometry::calc_hulls()
+{
+  for (size_t i = 0; i < parts.size(); ++i)
+  {
+    vector<int> buffer = HullBuffer::index_buffer(parts[i]);
+    hulls.push_back(buffer);
+  }
+}
+
+void Geometry::renderHulls()
+{
+  glBegin(GL_LINES);
+  for (size_t i = 0; i < hulls.size(); ++i)
+  {
+    auto buffer = hulls[i];
+    int buffer_size = buffer.size();
+    auto part = parts[i];
+    for (size_t j = 0; j < buffer_size - 1; ++j)
+    {
+      glVertex2f(part[buffer[j]].x, part[buffer[j]].y);
+      glVertex2f(part[buffer[j + 1]].x, part[buffer[j + 1]].y);
+    }
+    glVertex2f(part[buffer[buffer_size - 1]].x, part[buffer[buffer_size - 1]].y);
+    glVertex2f(part[buffer[0]].x, part[buffer[0]].y);
+  }
+  glEnd();
+}
 
 void Geometry::renderPoints(GLfloat size)
 {
   glPointSize(size);
   glBegin(GL_POINTS);
-  glColor3f(1, 0, 0);
-  for (auto point : points)
+  for (auto part : parts)
   {
-    glVertex2f(point.x, point.y);
+    for (auto point : part)
+    {
+      glVertex2f(point.x, point.y);
+    }
   }
   glEnd();
 }
 
 void Geometry::renderEdges()
 {
-  glColor3f(1, 1, 1);
   glBegin(GL_LINES);
   for (auto edge : test_edges)
   {
@@ -119,7 +159,6 @@ void Geometry::renderEdges()
 
 void Geometry::renderPolygon()
 {
-  glColor3f(1, 1, 1);
   glBegin(GL_POLYGON);
   for (auto point : points)
   {

@@ -8,45 +8,9 @@
 #include <GL/glew.h>
 
 #include "point.h"
+#include "comparator.h"
 
 using namespace std;
-
-struct Comparator
-{
-  Point p0;
-
-  Comparator(Point ref) : p0(ref) {}
-
-  static double squared_dist(Point &p1, Point &p2)
-  {
-    return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
-  }
-
-  int orientation(Point &a, Point &b, Point &c)
-  {
-    int value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
-    // Colinear
-    if (value == 0)
-      return 0;
-    // CW or CCW, respectively
-    return (value > 0) ? 1 : 2;
-  };
-
-  bool comp(Point &p0, Point &p1, Point &p2)
-  {
-    int ori = orientation(p0, p1, p2);
-    if (ori == 0)
-    {
-      return (squared_dist(p0, p2) >= squared_dist(p0, p1)) ? false : true;
-    }
-    return (ori == 2) ? false : true;
-  }
-
-  bool operator()(Point &p1, Point &p2)
-  {
-    return comp(p0, p1, p2);
-  }
-};
 
 struct Edge
 {
@@ -165,14 +129,18 @@ struct Edge
 class Geometry
 {
 private:
-  static Point p0;
-
 public:
   vector<Point> points = {};
   vector<pair<int, int>> edges = {};
   vector<Edge> test_edges = {};
+
+  vector<vector<Point>> parts;
+  vector<vector<int>> hulls;
   Geometry();
-  Geometry(vector<vector<Point>> &hulls, double eps = 1);
+  Geometry(const vector<vector<Point>> &p);
+  // Geometry(vector<vector<Point>> &hulls, double eps = 1);
+  void calc_hulls();
+  void renderHulls();
   void renderPoints(GLfloat size = 2);
   void renderEdges();
   void renderPolygon();

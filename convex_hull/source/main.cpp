@@ -14,6 +14,7 @@
 #include "objectio.h"
 #include "convexhull.h"
 #include "geometry.h"
+#include "polygon.h"
 #include "display.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
@@ -41,12 +42,17 @@ int main(int args, char *argv[])
   vector<vector<Point>> object = load_obj(filename);
   vector<vector<Point>> test = joined_convex_hull(object);
 
-  Geometry geo = Geometry(test);
+  Geometry geo = Geometry(object);
+
+  geo.calc_hulls();
 
   while (!display.IsClosed())
   {
     display.Clear();
-    geo.render();
+    glColor3f(1, 1, 1);
+    geo.renderHulls();
+    glColor3f(1, 0, 0);
+    geo.renderPoints(4);
     display.Update();
   }
 
