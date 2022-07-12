@@ -541,6 +541,8 @@ struct Circle
 class Geometry
 {
 private:
+  int steps = 0;
+
 public:
   vector<Point> points = {};
   vector<pair<int, int>> edges = {};
@@ -554,7 +556,7 @@ public:
   Geometry(const vector<vector<Point>> &p);
   // Geometry(vector<vector<Point>> &hulls, double eps = 1);
   void calc_hulls();
-  void triangulate(int iter_count = 10);
+  void triangulate(int step = 1);
   void renderHulls();
   void renderPoints(GLfloat size = 2);
   void renderEdges();

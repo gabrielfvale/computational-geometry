@@ -32,10 +32,15 @@ int main(int args, char *argv[])
     return 1;
   }
 
-  int iter_count = 10;
+  bool animate = false;
+  int iter_count = 0;
   if (args >= 3)
   {
-    iter_count = stoi(argv[2]);
+    animate = true;
+  }
+  else
+  {
+    iter_count = -1;
   }
 
   const char *filename = argv[1];
@@ -54,13 +59,32 @@ int main(int args, char *argv[])
   geo.triangulate(iter_count);
 
   bool display_hull = true;
-  bool display_triangles = false;
+  bool display_triangles = true;
+
+  int mTime = SDL_GetTicks(), cTime = SDL_GetTicks();
 
   while (!display.IsClosed())
   {
+    if (animate)
+    {
+      cTime = SDL_GetTicks();
+      if (cTime > mTime + 200)
+      {
+        iter_count += 1;
+        geo.triangulate(iter_count);
+        mTime = cTime;
+      }
+    }
+
     display.Clear();
     glColor3f(1, 0, 0);
     geo.renderPoints(4);
+
+    if (display_hull)
+    {
+      glColor3f(1, 1, 1);
+      geo.renderHulls();
+    }
 
     if (display_triangles)
     {
@@ -68,25 +92,8 @@ int main(int args, char *argv[])
       geo.renderTriangles();
     }
 
-    if (display_hull)
-    {
-      glColor3f(1, 1, 1);
-      geo.renderHulls();
-    }
     // geo.renderDebugEdge(15, 10);
     // geo.renderDebugEdge(0, 15);
-    // geo.renderDebugEdge(10, 12);
-    // geo.renderDebugEdge(5, 1);
-    // geo.renderDebugEdge(9, 1);
-    // geo.renderDebugEdge(9, 1);
-    // geo.renderDebugEdge(1, 10);
-    // geo.renderDebugEdge(10, 12);
-    // geo.renderDebugEdge(10, 1);
-    // geo.renderDebugEdge(3, 1);
-    // geo.renderDebugEdge(2, 0);
-    // geo.renderDebugEdge(13, 12);
-    // geo.renderDebugEdge(7, 1);
-    // geo.renderDebugEdge(13, 0);
     display.Update(&display_hull, &display_triangles);
   }
 
