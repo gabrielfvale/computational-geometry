@@ -92,7 +92,10 @@ int main(int args, char *argv[])
       geo.renderTriangles();
     }
 
-    // geo.renderDebugEdge(15, 10);
+    // geo.renderDebugEdge(6, 7);
+    // geo.renderDebugEdge(7, 3);
+    // geo.renderDebugEdge(6, 3);
+    // geo.renderDebugEdge(3, 5);
     // geo.renderDebugEdge(0, 15);
     display.Update(&display_hull, &display_triangles);
   }

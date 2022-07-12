@@ -157,6 +157,15 @@ struct Edge
     // CW or CCW, respectively
     return (value > 0) ? 1 : 2;
   };
+  static int orientation(int a, int b, int c, const vector<Point> &points)
+  {
+    int value = (points[b].y - points[a].y) * (points[c].x - points[b].x) - (points[b].x - points[a].x) * (points[c].y - points[b].y);
+    // Colinear
+    if (value == 0)
+      return 0;
+    // CW or CCW, respectively
+    return (value > 0) ? 1 : 2;
+  };
   bool intersects(const Edge &e, const vector<Point> &points)
   {
     // cout << endl;
