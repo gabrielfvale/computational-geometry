@@ -110,6 +110,173 @@ void Geometry::calc_hulls()
   }
 }
 
+void Geometry::triangulate()
+{
+  auto hull = hulls[0];
+
+  if (hull.size() == 3)
+  {
+    cout << "Min triangulation achieved" << endl;
+  }
+
+  vector<int> boundary;
+  for (auto i : hull)
+    boundary.push_back(i);
+
+  vector<Point> available;
+  for (auto p : parts[0])
+    available.push_back(p);
+
+  int iteration = 0;
+  int edge = 0;
+
+  while (boundary.size() > 3 && iteration < 3)
+  {
+    cout << endl;
+    cout << "Iteration: " << iteration << endl;
+    cout << "Boundary is: ";
+    for (auto p : boundary)
+      cout << p << ", ";
+    cout << endl;
+    cout << "Edge " << edge << ": " << boundary[edge] << ", " << boundary[edge + 1] << endl;
+    ++iteration;
+    if (edge >= boundary.size() - 1)
+    {
+      edge = 0;
+    }
+    int near_index = edge;
+    int chosen_point = 0;
+
+    Circle c = Circle(available[boundary[edge]], available[boundary[edge + 1]], available[chosen_point]);
+    Triangle t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+    // c.inCircle(available[0]);
+    bool circle_empty = false;
+    while (chosen_point < available.size() - 1)
+    {
+      if (chosen_point == boundary[edge] || chosen_point == boundary[edge + 1])
+      {
+        chosen_point++;
+        continue;
+      }
+      // cout << "creating circle for point " << chosen_point << endl;
+      c = Circle(available[boundary[edge]], available[boundary[edge + 1]], available[chosen_point]);
+      // cout << "circle valid: " << c.valid << endl;
+      int left_points = available.size();
+      if (!c.valid)
+      {
+        chosen_point++;
+        continue;
+      }
+      for (auto point : available)
+      {
+        left_points--;
+        if (c.inCircle(point))
+        {
+          // cout << "a point is in this circle." << endl;
+          // cout << endl;
+          break;
+        }
+      }
+      if (left_points == 0)
+      {
+        cout << "Circle is empty" << endl;
+        t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+        // cout << t << endl;
+        if (!t.intersectsList(triangles, available))
+        {
+          circle_empty = true;
+          cout << "Found a circle and triangle combo: " << t << endl;
+          break;
+        }
+      }
+      chosen_point++;
+    }
+
+    if (!circle_empty)
+    {
+      edge++;
+      continue;
+    }
+
+    // cout << "Chosen point for first edge: " << chosen_point << endl;
+    if (circle_empty)
+    {
+      cout << "EMPTY CIRCLE!! " << boundary[edge] << ", " << boundary[edge + 1] << ", " << chosen_point << endl;
+      cout << "Chosen point for first edge: " << available[boundary[edge]] << endl;
+      cout << "Chosen point for first edge: " << available[boundary[edge + 1]] << endl;
+      cout << "Chosen point for first edge: " << available[chosen_point] << endl;
+    }
+
+    // auto t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+    // cout << t << endl;
+    // if (t.intersectsList(triangles, available))
+    // {
+    //   edge++;
+    //   continue;
+    // }
+    // cout << "P, I: " << t.pointsInTriangle(available) << ", " << t.intersectsList(triangles, available) << endl;
+    // while (
+    //     near_index < available.size() - 1 &&
+    //     (t.pointsInTriangle(available) || t.intersectsList(triangles, available)))
+    // {
+    //   near_index++;
+    //   t = Triangle(boundary[edge], boundary[edge + 1], near_index);
+    //   // if (edge == 1 && boundary[edge] == 10 && boundary[edge + 1] == 13 && near_index == 8)
+    //   // {
+    //   //   cout << "weird case loop" << endl;
+    //   //   cout << "is there a point? " << t.pointsInTriangle(parts[0]) << endl;
+    //   //   cout << "intersects? " << t.intersectsList(triangles, parts[0]) << endl;
+    //   // }
+    //   cout << t << endl;
+    // }
+
+    // if (near_index == available.size() - 1)
+    // {
+    //   edge++;
+    //   continue;
+    // }
+
+    cout << "<-- INSERTING TRIANGLE --> " << endl;
+    triangles.push_back(t);
+    bool point_in_boundary = false;
+    for (auto i : boundary)
+    {
+      if (i == chosen_point)
+      {
+        point_in_boundary = true;
+        break;
+      }
+    }
+    cout << "Point in boundary: " << point_in_boundary << endl;
+    if (point_in_boundary)
+    {
+      cout << t << endl;
+      cout << boundary[edge] << endl;
+      int prev = HullBuffer::getIndex(boundary.size(), edge - 1);
+      int next = HullBuffer::getIndex(boundary.size(), edge + 2);
+      cout << "Prev, next: " << prev << ", " << next << endl;
+      if (boundary[prev] == chosen_point)
+      {
+        cout << "Point is prev" << endl;
+        boundary.erase(boundary.begin() + edge);
+      }
+      else if (boundary[next] == chosen_point)
+      {
+        cout << "Point is next" << endl;
+        boundary.erase(boundary.begin() + edge + 1);
+      }
+    }
+    else
+    {
+      boundary.insert(boundary.begin() + edge + 1, chosen_point);
+    }
+    edge = 0;
+  }
+
+  // triangles.push_back(Triangle(boundary[0], boundary[1], boundary[2]));
+  hulls[0] = boundary;
+}
+
 void Geometry::renderHulls()
 {
   glBegin(GL_LINES);
@@ -125,6 +292,9 @@ void Geometry::renderHulls()
     }
     glVertex2f(part[buffer[buffer_size - 1]].x, part[buffer[buffer_size - 1]].y);
     glVertex2f(part[buffer[0]].x, part[buffer[0]].y);
+    // glColor3f(0, 1, 0);
+    // glVertex2f(part[buffer[0]].x, part[buffer[0]].y);
+    // glVertex2f(part[buffer[1]].x, part[buffer[1]].y);
   }
   glEnd();
 }
@@ -154,6 +324,39 @@ void Geometry::renderEdges()
     glVertex2f(p2.x, p2.y);
   }
 
+  glEnd();
+}
+
+void Geometry::renderDebugEdge(int p1, int p2)
+{
+  // edge is red
+  // first is blue, second is green,
+
+  glColor3f(1, 0, 0);
+  glBegin(GL_LINES);
+  glVertex2f(parts[0][p1].x, parts[0][p1].y);
+  glVertex2f(parts[0][p2].x, parts[0][p2].y);
+  glEnd();
+  glBegin(GL_POINTS);
+  glColor3f(0, 0, 1);
+  glVertex2f(parts[0][p1].x, parts[0][p1].y);
+  glColor3f(0, 1, 0);
+  glVertex2f(parts[0][p2].x, parts[0][p2].y);
+  glEnd();
+}
+
+void Geometry::renderTriangles()
+{
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glBegin(GL_TRIANGLES);
+  auto p = parts[0];
+  for (auto t : triangles)
+  {
+    glVertex2f(p[t.v1].x, p[t.v1].y);
+    glVertex2f(p[t.v2].x, p[t.v2].y);
+    glVertex2f(p[t.v3].x, p[t.v3].y);
+  }
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glEnd();
 }
 

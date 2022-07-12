@@ -52,7 +52,6 @@ namespace HullBuffer
         min = i;
       }
     }
-    cout << "min_y " << min_y << endl;
 
     // Swap min point
     std::swap(points[0], points[min]);
@@ -105,6 +104,21 @@ namespace HullBuffer
     }
 
     return v;
+  }
+  static int getIndex(int size, int index)
+  {
+    if (index >= size)
+    {
+      return index % size;
+    }
+    else if (index < 0)
+    {
+      return (index % size) + size;
+    }
+    else
+    {
+      return index;
+    }
   }
 };
 

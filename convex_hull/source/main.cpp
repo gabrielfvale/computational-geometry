@@ -45,6 +45,7 @@ int main(int args, char *argv[])
   Geometry geo = Geometry(object);
 
   geo.calc_hulls();
+  geo.triangulate();
 
   while (!display.IsClosed())
   {
@@ -53,6 +54,14 @@ int main(int args, char *argv[])
     geo.renderHulls();
     glColor3f(1, 0, 0);
     geo.renderPoints(4);
+    // glColor3f(1, 1, 0);
+    // geo.renderTriangles();
+    // geo.renderDebugEdge(15, 12);
+    // geo.renderDebugEdge(3, 1);
+    // geo.renderDebugEdge(2, 0);
+    // geo.renderDebugEdge(13, 12);
+    // geo.renderDebugEdge(7, 1);
+    // geo.renderDebugEdge(13, 0);
     display.Update();
   }
 
