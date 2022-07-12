@@ -49,8 +49,6 @@ struct Edge
     auto v1 = points[vertices.first];
     auto v2 = points[vertices.second];
 
-    double eps = 0.001;
-
     double A = p.x - v1.x;
     double B = p.y - v1.y;
     double C = v2.x - v1.x;

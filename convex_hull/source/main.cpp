@@ -73,7 +73,8 @@ int main(int args, char *argv[])
       glColor3f(1, 1, 1);
       geo.renderHulls();
     }
-    geo.renderDebugEdge(15, 10);
+    // geo.renderDebugEdge(15, 10);
+    // geo.renderDebugEdge(0, 15);
     // geo.renderDebugEdge(10, 12);
     // geo.renderDebugEdge(5, 1);
     // geo.renderDebugEdge(9, 1);
