@@ -32,6 +32,12 @@ int main(int args, char *argv[])
     return 1;
   }
 
+  int iter_count = 10;
+  if (args >= 3)
+  {
+    iter_count = stoi(argv[2]);
+  }
+
   const char *filename = argv[1];
   string path(filename);
   string base_filename = path.substr(path.find_last_of("/\\") + 1);
@@ -45,24 +51,42 @@ int main(int args, char *argv[])
   Geometry geo = Geometry(object);
 
   geo.calc_hulls();
-  geo.triangulate();
+  geo.triangulate(iter_count);
+
+  bool display_hull = true;
+  bool display_triangles = false;
 
   while (!display.IsClosed())
   {
     display.Clear();
-    glColor3f(1, 1, 1);
-    geo.renderHulls();
     glColor3f(1, 0, 0);
     geo.renderPoints(4);
-    // glColor3f(1, 1, 0);
-    // geo.renderTriangles();
-    // geo.renderDebugEdge(15, 12);
+
+    if (display_triangles)
+    {
+      glColor3f(1, 1, 0);
+      geo.renderTriangles();
+    }
+
+    if (display_hull)
+    {
+      glColor3f(1, 1, 1);
+      geo.renderHulls();
+    }
+    geo.renderDebugEdge(15, 10);
+    // geo.renderDebugEdge(10, 12);
+    // geo.renderDebugEdge(5, 1);
+    // geo.renderDebugEdge(9, 1);
+    // geo.renderDebugEdge(9, 1);
+    // geo.renderDebugEdge(1, 10);
+    // geo.renderDebugEdge(10, 12);
+    // geo.renderDebugEdge(10, 1);
     // geo.renderDebugEdge(3, 1);
     // geo.renderDebugEdge(2, 0);
     // geo.renderDebugEdge(13, 12);
     // geo.renderDebugEdge(7, 1);
     // geo.renderDebugEdge(13, 0);
-    display.Update();
+    display.Update(&display_hull, &display_triangles);
   }
 
   return 0;

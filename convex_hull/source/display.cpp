@@ -68,7 +68,7 @@ bool Display::IsClosed()
   return m_isClosed;
 }
 
-void Display::Update()
+void Display::Update(bool *h_toggle, bool *t_toggle)
 {
 
   SDL_GL_SwapWindow(m_window);
@@ -76,7 +76,26 @@ void Display::Update()
 
   while (SDL_PollEvent(&e))
   {
-    if (e.type == SDL_QUIT)
+    switch (e.type)
+    {
+    case SDL_QUIT:
       m_isClosed = true;
+      break;
+    case SDL_KEYDOWN:
+      switch (e.key.keysym.sym)
+      {
+      case SDLK_h:
+        if (h_toggle != nullptr)
+          *h_toggle = !(*h_toggle);
+        break;
+      case SDLK_t:
+        if (t_toggle != nullptr)
+          *t_toggle = !(*t_toggle);
+        break;
+      }
+      break;
+    default:
+      break;
+    }
   }
 }

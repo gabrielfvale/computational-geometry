@@ -11,7 +11,7 @@ public:
   int height;
   Display(int width, int height, const std::string &title);
   void Clear();
-  void Update();
+  void Update(bool *h_toggle = nullptr, bool *t_toggle = nullptr);
   bool IsClosed();
   virtual ~Display();
 

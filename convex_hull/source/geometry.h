@@ -276,10 +276,10 @@ struct Triangle
     Point p1 = points[v2];
     Point p2 = points[v3];
 
-    cout << "Prev points: " << endl;
-    cout << p0 << endl;
-    cout << p1 << endl;
-    cout << p2 << endl;
+    // cout << "Prev points: " << endl;
+    // cout << p0 << endl;
+    // cout << p1 << endl;
+    // cout << p2 << endl;
 
     // Offset points "inward"
     Point c = Point(
@@ -292,12 +292,12 @@ struct Triangle
     double n0l = sqrt(n0.x * n0.x + n0.y + n0.y);
     double n1l = sqrt(n1.x * n1.x + n1.y + n1.y);
     double n2l = sqrt(n2.x * n2.x + n2.y + n2.y);
-    n0.x /= n0l;
-    n0.y /= n0l;
-    n1.x /= n1l;
-    n1.y /= n1l;
-    n2.x /= n2l;
-    n2.y /= n2l;
+    n0.x /= n0l > 0 ? n0l : 1;
+    n0.y /= n0l > 0 ? n0l : 1;
+    n1.x /= n1l > 0 ? n1l : 1;
+    n1.y /= n1l > 0 ? n1l : 1;
+    n2.x /= n2l > 0 ? n2l : 1;
+    n2.y /= n2l > 0 ? n2l : 1;
 
     p0.x += n0.x;
     p0.y += n0.y;
@@ -308,10 +308,10 @@ struct Triangle
     p2.x += n2.x;
     p2.y += n2.y;
 
-    cout << "Offset points: " << endl;
-    cout << p0 << endl;
-    cout << p1 << endl;
-    cout << p2 << endl;
+    // cout << "Offset points: " << endl;
+    // cout << p0 << endl;
+    // cout << p1 << endl;
+    // cout << p2 << endl;
 
     Edge h;
     vector<Point> edges1 = {p0, p1, p2};
@@ -325,7 +325,7 @@ struct Triangle
         int next_j = (j + 1) % 3;
         if (h.intersects(edges1[i], edges1[next_i], edges2[j], edges2[next_j]))
         {
-          cout << "heres the edges that intercepted: " << i << ", " << j << endl;
+          // cout << "heres the edges that intercepted: " << i << ", " << j << endl;
           return true;
         }
       }
@@ -556,7 +556,7 @@ public:
   Geometry(const vector<vector<Point>> &p);
   // Geometry(vector<vector<Point>> &hulls, double eps = 1);
   void calc_hulls();
-  void triangulate();
+  void triangulate(int iter_count = 10);
   void renderHulls();
   void renderPoints(GLfloat size = 2);
   void renderEdges();

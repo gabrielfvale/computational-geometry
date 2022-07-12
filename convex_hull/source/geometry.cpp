@@ -110,7 +110,7 @@ void Geometry::calc_hulls()
   }
 }
 
-void Geometry::triangulate()
+void Geometry::triangulate(int iter_count)
 {
   auto hull = hulls[0];
 
@@ -130,7 +130,7 @@ void Geometry::triangulate()
   int iteration = 0;
   int edge = 0;
 
-  while (boundary.size() > 3 && iteration < 3)
+  while (boundary.size() >= 3 && available.size() > 3 && iteration < iter_count)
   {
     cout << endl;
     cout << "Iteration: " << iteration << endl;
@@ -138,106 +138,107 @@ void Geometry::triangulate()
     for (auto p : boundary)
       cout << p << ", ";
     cout << endl;
+
     cout << "Edge " << edge << ": " << boundary[edge] << ", " << boundary[edge + 1] << endl;
     ++iteration;
     if (edge >= boundary.size() - 1)
     {
       edge = 0;
     }
-    int near_index = edge;
-    int chosen_point = 0;
+    int chosen_point = boundary.size() - 1;
+    // int chosen_point = 0;
 
-    Circle c = Circle(available[boundary[edge]], available[boundary[edge + 1]], available[chosen_point]);
-    Triangle t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
-    // c.inCircle(available[0]);
-    bool circle_empty = false;
-    while (chosen_point < available.size() - 1)
-    {
-      if (chosen_point == boundary[edge] || chosen_point == boundary[edge + 1])
-      {
-        chosen_point++;
-        continue;
-      }
-      // cout << "creating circle for point " << chosen_point << endl;
-      c = Circle(available[boundary[edge]], available[boundary[edge + 1]], available[chosen_point]);
-      // cout << "circle valid: " << c.valid << endl;
-      int left_points = available.size();
-      if (!c.valid)
-      {
-        chosen_point++;
-        continue;
-      }
-      for (auto point : available)
-      {
-        left_points--;
-        if (c.inCircle(point))
-        {
-          // cout << "a point is in this circle." << endl;
-          // cout << endl;
-          break;
-        }
-      }
-      if (left_points == 0)
-      {
-        cout << "Circle is empty" << endl;
-        t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
-        // cout << t << endl;
-        if (!t.intersectsList(triangles, available))
-        {
-          circle_empty = true;
-          cout << "Found a circle and triangle combo: " << t << endl;
-          break;
-        }
-      }
-      chosen_point++;
-    }
+    // Circle c = Circle(available[boundary[edge]], available[boundary[edge + 1]], available[chosen_point]);
+    // Triangle t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+    // // c.inCircle(available[0]);
+    // bool circle_empty = false;
+    // while (chosen_point < available.size() - 1)
+    // {
+    //   if (chosen_point == boundary[edge] || chosen_point == boundary[edge + 1])
+    //   {
+    //     chosen_point++;
+    //     continue;
+    //   }
+    //   // cout << "creating circle for point " << chosen_point << endl;
+    //   c = Circle(available[boundary[edge]], available[boundary[edge + 1]], available[chosen_point]);
+    //   // cout << "circle valid: " << c.valid << endl;
+    //   int left_points = available.size();
+    //   if (!c.valid)
+    //   {
+    //     chosen_point++;
+    //     continue;
+    //   }
+    //   for (auto point : available)
+    //   {
+    //     left_points--;
+    //     if (c.inCircle(point))
+    //     {
+    //       // cout << "a point is in this circle." << endl;
+    //       // cout << endl;
+    //       break;
+    //     }
+    //   }
+    //   if (left_points == 0)
+    //   {
+    //     cout << "Circle is empty" << endl;
+    //     t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+    //     // cout << t << endl;
+    //     if (!t.intersectsList(triangles, available))
+    //     {
+    //       circle_empty = true;
+    //       cout << "Found a circle and triangle combo: " << t << endl;
+    //       break;
+    //     }
+    //   }
+    //   chosen_point++;
+    // }
 
-    if (!circle_empty)
-    {
-      edge++;
-      continue;
-    }
+    // if (!circle_empty)
+    // {
+    //   edge++;
+    //   continue;
+    // }
 
-    // cout << "Chosen point for first edge: " << chosen_point << endl;
-    if (circle_empty)
-    {
-      cout << "EMPTY CIRCLE!! " << boundary[edge] << ", " << boundary[edge + 1] << ", " << chosen_point << endl;
-      cout << "Chosen point for first edge: " << available[boundary[edge]] << endl;
-      cout << "Chosen point for first edge: " << available[boundary[edge + 1]] << endl;
-      cout << "Chosen point for first edge: " << available[chosen_point] << endl;
-    }
+    // // cout << "Chosen point for first edge: " << chosen_point << endl;
+    // if (circle_empty)
+    // {
+    //   cout << "EMPTY CIRCLE!! " << boundary[edge] << ", " << boundary[edge + 1] << ", " << chosen_point << endl;
+    //   cout << "Chosen point for first edge: " << available[boundary[edge]] << endl;
+    //   cout << "Chosen point for first edge: " << available[boundary[edge + 1]] << endl;
+    //   cout << "Chosen point for first edge: " << available[chosen_point] << endl;
+    // }
 
-    // auto t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+    auto t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
     // cout << t << endl;
     // if (t.intersectsList(triangles, available))
     // {
     //   edge++;
     //   continue;
     // }
-    // cout << "P, I: " << t.pointsInTriangle(available) << ", " << t.intersectsList(triangles, available) << endl;
-    // while (
-    //     near_index < available.size() - 1 &&
-    //     (t.pointsInTriangle(available) || t.intersectsList(triangles, available)))
-    // {
-    //   near_index++;
-    //   t = Triangle(boundary[edge], boundary[edge + 1], near_index);
-    //   // if (edge == 1 && boundary[edge] == 10 && boundary[edge + 1] == 13 && near_index == 8)
-    //   // {
-    //   //   cout << "weird case loop" << endl;
-    //   //   cout << "is there a point? " << t.pointsInTriangle(parts[0]) << endl;
-    //   //   cout << "intersects? " << t.intersectsList(triangles, parts[0]) << endl;
-    //   // }
-    //   cout << t << endl;
-    // }
+    cout << "P, I: " << t.pointsInTriangle(available) << ", " << t.intersectsList(triangles, available) << endl;
+    while (
+        chosen_point >= 0 &&
+        (t.pointsInTriangle(available) || t.intersectsList(triangles, parts[0])))
+    {
+      chosen_point--;
+      t = Triangle(boundary[edge], boundary[edge + 1], chosen_point);
+      // if (edge == 1 && boundary[edge] == 10 && boundary[edge + 1] == 13 && chosen_point == 8)
+      // {
+      //   cout << "weird case loop" << endl;
+      //   cout << "is there a point? " << t.pointsInTriangle(parts[0]) << endl;
+      //   cout << "intersects? " << t.intersectsList(triangles, parts[0]) << endl;
+      // }
+      // cout << t << endl;
+    }
 
-    // if (near_index == available.size() - 1)
-    // {
-    //   edge++;
-    //   continue;
-    // }
+    if (chosen_point < 0)
+    {
+      edge++;
+      continue;
+    }
 
-    cout << "<-- INSERTING TRIANGLE --> " << endl;
-    triangles.push_back(t);
+    cout << t << endl;
+
     bool point_in_boundary = false;
     for (auto i : boundary)
     {
@@ -254,7 +255,8 @@ void Geometry::triangulate()
       cout << boundary[edge] << endl;
       int prev = HullBuffer::getIndex(boundary.size(), edge - 1);
       int next = HullBuffer::getIndex(boundary.size(), edge + 2);
-      cout << "Prev, next: " << prev << ", " << next << endl;
+      cout << "Prev, next: " << boundary[prev] << ", " << boundary[next] << endl;
+      cout << "Chosen: " << chosen_point << endl;
       if (boundary[prev] == chosen_point)
       {
         cout << "Point is prev" << endl;
@@ -265,11 +267,33 @@ void Geometry::triangulate()
         cout << "Point is next" << endl;
         boundary.erase(boundary.begin() + edge + 1);
       }
+      else
+      {
+        cout << "Extra case" << endl;
+        // boundary.insert(boundary.begin() + edge + 1, chosen_point);
+        // its a loop, continue.
+        edge++;
+        continue;
+      }
     }
     else
     {
       boundary.insert(boundary.begin() + edge + 1, chosen_point);
     }
+
+    // for (size_t i = 0; i < boundary.size() - 2; ++i)
+    // {
+    //   int next = i + 1;
+    //   int p = i + 2;
+    //   Edge e = Edge(i, next);
+    //   if (e.pLiesInByDist(p, available))
+    //   {
+    //     boundary.insert(boundary.begin() + i, p);
+    //   }
+    // }
+    cout << "<-- INSERTING TRIANGLE --> " << endl;
+    cout << t << endl;
+    triangles.push_back(t);
     edge = 0;
   }
 
