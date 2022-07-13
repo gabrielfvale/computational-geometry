@@ -25,6 +25,7 @@ private:
 public:
   Demo();
   Demo(const vector<vector<Point>> &p);
+  void calc_boundary(const vector<vector<Point>> &p);
   void triangulate(int step = 1);
   void render();
   void renderDebug(int p1, int p2, int p);

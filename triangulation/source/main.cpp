@@ -15,7 +15,6 @@
 #include "convexhull.h"
 #include "geometry.h"
 #include "demo.h"
-#include "polygon.h"
 #include "display.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
@@ -84,7 +83,7 @@ int main(int args, char *argv[])
     if (animate)
     {
       cTime = SDL_GetTicks();
-      if (cTime > mTime + 400)
+      if (cTime > mTime + 200)
       {
         iter_count++;
         demo.triangulate(iter_count);

@@ -1,5 +1,5 @@
 # Name of the project
-PROJ_NAME=triangulation.out
+PROJ_NAME=Triangulation.out
 
 # .cpp files
 C_SOURCE=$(wildcard ./source/*.cpp)

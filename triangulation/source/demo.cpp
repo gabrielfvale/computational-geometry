@@ -6,6 +6,11 @@
 
 Demo::Demo(const vector<vector<Point>> &p)
 {
+  calc_boundary(p);
+}
+
+void Demo::calc_boundary(const vector<vector<Point>> &p)
+{
   if (p.size() >= 1)
   {
     auto part_used = p[0];
@@ -190,6 +195,7 @@ void Demo::triangulate(int step)
     {
       triangles.push_back(t);
     }
+    iter_boundary.clear();
   }
 
   boundary = iter_boundary;
@@ -197,16 +203,6 @@ void Demo::triangulate(int step)
 
 void Demo::render()
 {
-  glColor3f(1, 1, 1);
-  glBegin(GL_LINES);
-  for (size_t j = 0; j < boundary.size(); ++j)
-  {
-    int next = (j + 1) % boundary.size();
-    glVertex2f(points[boundary[j]].x, points[boundary[j]].y);
-    glVertex2f(points[boundary[next]].x, points[boundary[next]].y);
-  }
-  glEnd();
-
   glColor3f(1, 0.5, 0.3);
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glBegin(GL_TRIANGLES);
@@ -217,6 +213,16 @@ void Demo::render()
     glVertex2f(points[t.v3].x, points[t.v3].y);
   }
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glEnd();
+
+  glColor3f(1, 1, 1);
+  glBegin(GL_LINES);
+  for (size_t j = 0; j < boundary.size(); ++j)
+  {
+    int next = (j + 1) % boundary.size();
+    glVertex2f(points[boundary[j]].x, points[boundary[j]].y);
+    glVertex2f(points[boundary[next]].x, points[boundary[next]].y);
+  }
   glEnd();
 
   glColor3f(0, 0, 1);
