@@ -2,7 +2,6 @@
 #define POINT_H
 
 #include <iostream>
-
 struct Point
 {
   double x;

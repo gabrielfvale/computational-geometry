@@ -91,14 +91,6 @@ int main(int args, char *argv[])
       }
     }
 
-    // cTime = SDL_GetTicks();
-    // if (cTime > mTime + 1000)
-    // {
-    //   point_try--;
-    //   cout << point_try << endl;
-    //   mTime = cTime;
-    // }
-
     display.Clear();
     glColor3f(1, 0, 0);
     geo.renderPoints(4);
@@ -112,7 +104,6 @@ int main(int args, char *argv[])
     if (display_triangles)
     {
       glColor3f(1, 0.5, 0.3);
-      // geo.renderHulls();
       geo.renderTriangles();
     }
 
@@ -123,9 +114,6 @@ int main(int args, char *argv[])
 
     // geo.renderDebug(2, 5, 13);
     // geo.renderDebugEdge(9, 10);
-    // geo.renderDebugEdge(10, 8);
-    // geo.renderDebugEdge(8, 9);
-    // geo.renderDebugEdge(9, 7);
     display.Update(&display_hull, &display_triangles);
   }
 

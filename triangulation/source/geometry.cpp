@@ -125,37 +125,43 @@ void Geometry::triangulate()
       for (auto p : boundary)
         output << p << ", ";
       output << endl;
+      ++iteration;
 
+      // Reset edge if greater than boundary
       if (edge >= boundary.size() - 1)
       {
         edge = 0;
       }
 
+      // Calculate next point of edge
       int edge_n = (edge + 1) % boundary.size();
       output << "Edge " << edge << ": " << boundary[edge] << ", " << boundary[edge_n] << endl;
       output << "Edge P: " << available[boundary[edge]] << ", " << available[boundary[edge_n]] << endl;
-      ++iteration;
 
+      // Select random point
       int chosen_point = available.size() - 1;
-
+      // Make sure random selected point is not part of the edge
       while (chosen_point == boundary[edge] || chosen_point == boundary[edge_n])
       {
         chosen_point = (chosen_point - 1) % available.size();
       }
 
-      Edge h;
+      Edge h; // helper edge
+      // Create circumcircle from 3 points
       Circle c = Circle(available[boundary[edge]], available[boundary[edge_n]], available[chosen_point]);
+      // Create triangle
       Triangle t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
       while (chosen_point >= 0)
       {
         output << "Checking point " << chosen_point << ", " << available[chosen_point] << endl;
+        // Check again if chosen point is part of the edge
         if (chosen_point == boundary[edge] || chosen_point == boundary[edge_n])
         {
           chosen_point--;
           continue;
         }
 
-        // Continue if points are colinear
+        // Continue if points do not follow clockwise order
         if (h.orientationf(boundary[edge], boundary[edge_n], chosen_point, parts[k]) != 1)
         {
           // output << "Points not in clockwise order" << endl;
@@ -163,7 +169,9 @@ void Geometry::triangulate()
           continue;
         }
 
+        // Create new test circle
         c = Circle(available[boundary[edge]], available[boundary[edge_n]], available[chosen_point]);
+        // For each point, check if it is inside the circle
         int in_circle = parts[k].size() - 1;
         while (in_circle >= 0)
         {
@@ -173,6 +181,7 @@ void Geometry::triangulate()
             in_circle--;
             continue;
           }
+          // If a point is found, break loop (fail)
           if (c.inCircle(available[in_circle]))
           {
             // output << "POINT FOUND IN CIRCLE:" << endl;
@@ -189,28 +198,32 @@ void Geometry::triangulate()
           in_circle--;
         }
 
+        // If there are no points inside the circle, and chosen is not in the edge
         if (in_circle < 0 && chosen_point != boundary[edge] && chosen_point != boundary[edge_n])
         {
-          // output << "Circle is empty" << endl;
+          // Create triangle
           t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
-          // output << t << endl;
-          bool intersects = t.intersectsList(iter_triangles, available);
+          // Check for intersections
           if (!t.intersectsList(iter_triangles, available))
           {
             output << "Found a circle and triangle combo: " << t << endl;
             output << available[chosen_point] << endl;
+            // If an intersection is found, break (fail)
             break;
           }
         }
         chosen_point--;
       }
 
+      // If no point was found that formed an empty circle with
+      // the edge, go to next edge
       if (chosen_point < 0)
       {
         edge++;
         continue;
       }
 
+      // Test for edge cases
       bool point_in_boundary = false;
       for (auto i : boundary)
       {
@@ -220,6 +233,8 @@ void Geometry::triangulate()
           break;
         }
       }
+
+      // Edge cases: the chosen point is in the boundary
       output << "Point in boundary: " << point_in_boundary << endl;
       if (point_in_boundary)
       {
@@ -227,26 +242,29 @@ void Geometry::triangulate()
         int next = HullBuffer::getIndex(boundary.size(), edge_n + 1);
         output << "Prev, next: " << boundary[prev] << ", " << boundary[next] << endl;
         output << "Chosen: " << chosen_point << endl;
+
+        // If the chosen point is the edge's prev
         if (boundary[prev] == chosen_point)
         {
           output << "Point is prev" << endl;
+          // Remove first point of edge so the boundary now contains an edge
+          // in the format: prev -> edge next
           boundary.erase(boundary.begin() + edge);
         }
+        // If the chosen point is the edge's next
         else if (boundary[next] == chosen_point)
         {
+          // Remove first second of edge so the boundary now contains an edge
+          // in the format: edge -> chosen
           output << "Point is next" << endl;
           boundary.erase(boundary.begin() + edge_n);
         }
         else
         {
-          // its a loop, continue.
+          // Third final case: chosen point is neither prev nor next
           output << "Point Extra case" << endl;
-          // Edge h;
-          // if (helper.orientation(boundary[edge], boundary[edge_n], boundary[next], available) == 0)
-          // {
-          //   output << "BOUNDARY LOOP" << endl;
-          // }
 
+          // If it's a closed loop, continue.
           if (chosen_point != boundary[next])
           {
             // output << "INVALID LOOP! CHOSEN NOT NEXT" << endl;
@@ -259,17 +277,24 @@ void Geometry::triangulate()
           }
         }
       }
+      // If the point is not in the boundary, insert it after the edge,
+      // effectively doing:
+      // edge -> edge_n (already existing)
+      // edge_n -> chosen (new edge)
+      // chosen -> next (modified)
       else
       {
         boundary.insert(boundary.begin() + edge_n, chosen_point);
       }
 
+      // Insert triangle in list after updating boundary
       output << "<-- INSERTING TRIANGLE --> " << endl;
       output << t << endl;
       iter_triangles.push_back(t);
       // edge = 0;
     }
 
+    // Base case = boundary is minimum
     if (boundary.size() == 3)
     {
       Triangle t = Triangle(boundary[0], boundary[1], boundary[2]);
@@ -280,7 +305,6 @@ void Geometry::triangulate()
       boundary = {};
     }
 
-    // hulls[k] = boundary;
     triangles.push_back(iter_triangles);
   }
   output.close();
