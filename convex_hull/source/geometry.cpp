@@ -8,91 +8,6 @@ using namespace std;
 
 Geometry::Geometry() {}
 
-/*
-Geometry::Geometry(vector<vector<Point>> &hulls, double eps)
-{
-  if (hulls.size() == 0)
-  {
-    return;
-  }
-
-  vector<Point> all_points = {};
-  for (auto hull : hulls)
-    for (auto point : hull)
-      all_points.push_back(point);
-
-  if (all_points.size() < 3)
-  {
-    return;
-  }
-
-  int prev_hull_size = 0;
-  for (auto hull : hulls)
-  {
-    auto s = hull.size() - 1;
-    for (int i = 0; i < s; ++i)
-    {
-      int offset = prev_hull_size + i;
-      test_edges.push_back(Edge(offset, offset + 1));
-    }
-    test_edges.push_back(Edge(prev_hull_size + s, prev_hull_size));
-    prev_hull_size += s + 1;
-  }
-
-  points = all_points;
-
-  vector<Edge> t;
-  for (int i = 0; i < test_edges.size(); ++i)
-  {
-    if (!test_edges[i].visited)
-    {
-      test_edges[i].visited = true;
-      for (int j = 1; j < test_edges.size(); ++j)
-      {
-        if (i != j)
-        {
-          pair<int, int> ev = test_edges[i].vertices;
-          pair<int, int> e2v = test_edges[j].vertices;
-
-          // First case: edge contains another
-          bool intersect1 = test_edges[i].pLiesInByDist(e2v.first, points);
-          bool intersect2 = test_edges[i].pLiesInByDist(e2v.second, points);
-
-          if (intersect1 && intersect2)
-          {
-            // cout << "Found and edge that has intersections" << endl;
-            // cout << test_edges[i] << endl;
-            // cout << test_edges[j] << endl;
-
-            double eps = 0.01;
-            // Repeated edges case
-            if (test_edges[i].sameEdge(test_edges[j], points))
-            {
-              // cout << "same edge detected" << endl;
-              test_edges.erase(test_edges.begin() + j);
-              break;
-            }
-            test_edges.erase(test_edges.begin() + i);
-            test_edges.erase(test_edges.begin() + j);
-            double d1 = points[e2v.first].squared_dist(points[ev.first]);
-            double d2 = points[e2v.second].squared_dist(points[ev.first]);
-            if (d1 < d2)
-            {
-              test_edges.push_back(Edge(ev.first, e2v.first));
-              test_edges.push_back(Edge(e2v.second, ev.second));
-            }
-            else
-            {
-              test_edges.push_back(Edge(ev.first, e2v.second));
-              test_edges.push_back(Edge(ev.second, e2v.first));
-            }
-          }
-        }
-      }
-    }
-  }
-}
-*/
 Geometry::Geometry(const vector<vector<Point>> &p)
 {
   for (auto v : p)
@@ -118,17 +33,6 @@ void Geometry::triangulate(int step)
   {
     return;
   }
-
-  // if (hulls[0].size() == 3)
-  // {
-  //   int p1 = hull[0];
-  //   int p2 = hull[1];
-  //   int p3 = hull[2];
-  //   Triangle t = Triangle(p1, p2, p3);
-  //   triangles.push_back(t);
-  //   hulls[0].clear();
-  //   cout << "Min triangulation achieved" << endl;
-  // }
 
   vector<int> boundary;
   for (auto i : hull)
@@ -163,15 +67,10 @@ void Geometry::triangulate(int step)
     }
   }
 
-  while (boundary.size() > 3 && iteration < 2000 && (step == -1 || steps + 1 < step))
+  while (boundary.size() > 3 && iteration < 200 && (step == -1 || steps + 1 < step))
   {
     cout << endl;
     cout << "Iteration: " << iteration << endl;
-    cout << "Boundary is: ";
-    for (auto p : boundary)
-      cout << p << ", ";
-    cout << endl;
-
     cout << "Boundary is: ";
     for (auto p : boundary)
       cout << p << ", ";
@@ -259,28 +158,6 @@ void Geometry::triangulate(int step)
       continue;
     }
 
-    // cout << "Orientation: " << helper.orientation(boundary[edge], boundary[edge_n], chosen_point, available) << endl;
-
-    // vector<int> created_edges = {boundary[edge], boundary[edge_n], chosen_point};
-    // for (size_t i = 0; i < available.size(); ++i)
-    // {
-    //   for (size_t j = 0; j < created_edges.size(); ++j)
-    //   {
-    //     int next = (j + 1) % created_edges.size();
-
-    //     if (i != created_edges[j] && i != created_edges[next])
-    //     {
-    //       Edge e = Edge(created_edges[j], created_edges[next]);
-    //       double dist = e.pDist(i, available);
-    //       if (e.pLiesInByDist(i, available, 1))
-    //       {
-    //         // cout << "There is a point that lies inside a boundary." << endl;
-    //         boundary.insert(boundary.begin() + edge_n, i);
-    //       }
-    //     }
-    //   }
-    // }
-
     bool point_in_boundary = false;
     for (auto i : boundary)
     {
@@ -310,18 +187,23 @@ void Geometry::triangulate(int step)
       else
       {
         // its a loop, continue.
-        cout << "Extra case" << endl;
+        cout << "Point Extra case" << endl;
         Edge h;
-        // Point e1 = points[boundary[edge]];
-        // Point e2 = points[boundary[edge_n]];
-        // Point c = points[chosen_point];
         if (helper.orientation(boundary[edge], boundary[edge_n], boundary[next], available) == 0)
         {
-          cout << "INTERNAL LOOP" << endl;
+          cout << "BOUNDARY LOOP" << endl;
+        }
+
+        if (chosen_point != next)
+        {
+          cout << "INVALID LOOP! CHOSEN NOT NEXT" << endl;
           edge++;
           continue;
         }
-        // h.orientation();
+        else
+        {
+          boundary.insert(boundary.begin() + edge_n, chosen_point);
+        }
       }
     }
     else
@@ -403,7 +285,7 @@ void Geometry::renderDebugEdge(int p1, int p2)
   // edge is red
   // first is blue, second is green,
 
-  glColor3f(1, 0, 0);
+  // glColor3f(1, 0, 0);
   glBegin(GL_LINES);
   glVertex2f(parts[0][p1].x, parts[0][p1].y);
   glVertex2f(parts[0][p2].x, parts[0][p2].y);
@@ -414,6 +296,46 @@ void Geometry::renderDebugEdge(int p1, int p2)
   glColor3f(0, 1, 0);
   glVertex2f(parts[0][p2].x, parts[0][p2].y);
   glEnd();
+}
+
+void Geometry::renderDebug(int v1, int v2, int p)
+{
+  int prev = HullBuffer::getIndex(hulls[0].size(), v1 - 1);
+  int next = HullBuffer::getIndex(hulls[0].size(), v2 + 1);
+  int next_p = HullBuffer::getIndex(hulls[0].size(), p + 1);
+
+  int c_v1 = hulls[0][v1];
+  int c_v2 = hulls[0][v2];
+  int c_p = hulls[0][p];
+  // Current edge
+  glColor3f(1, 0, 0);
+  renderDebugEdge(c_v1, c_v2);
+  // Next edge
+  glColor3f(1, 1, 0);
+  renderDebugEdge(c_v2, hulls[0][next]);
+  glColor3f(1, 1, 0);
+  renderDebugEdge(c_p, hulls[0][next_p]);
+  // Prev edge
+  glColor3f(0, 1, 1);
+  renderDebugEdge(hulls[0][prev], c_v1);
+  // Final triangle
+  glColor3f(1, 1, 1);
+  renderDebugEdge(c_p, c_v2);
+
+  // // Current edge
+  // glColor3f(1, 0, 0);
+  // renderDebugEdge(6, 14);
+  // // Next edge
+  // glColor3f(1, 1, 0);
+  // renderDebugEdge(14, 20);
+  // // Prev edge
+  // glColor3f(0, 1, 1);
+  // renderDebugEdge(5, 6);
+  // // Final triangle
+  // glColor3f(1, 1, 1);
+  // renderDebugEdge(14, 21);
+  // glColor3f(1, 1, 1);
+  // renderDebugEdge(21, 6);
 }
 
 void Geometry::renderTriangles()

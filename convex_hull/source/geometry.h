@@ -570,6 +570,7 @@ public:
   void renderPoints(GLfloat size = 2);
   void renderEdges();
   void renderDebugEdge(int p1, int p2);
+  void renderDebug(int v1, int v2, int p);
   void renderTriangles();
   void renderPolygon();
   void render();
