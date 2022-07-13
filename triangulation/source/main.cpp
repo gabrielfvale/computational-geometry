@@ -34,8 +34,14 @@ int main(int args, char *argv[])
   }
 
   bool animate = false;
+  bool write_out = false;
   int iter_count = 0;
-  if (args >= 3)
+
+  if (args >= 3 && strcmp(argv[2], "1") == 0)
+  {
+    write_out = true;
+  }
+  if (args >= 4)
   {
     animate = true;
   }
@@ -61,6 +67,11 @@ int main(int args, char *argv[])
 
   geo.calc_hulls();
   geo.triangulate();
+
+  if (write_out)
+  {
+    write_obj(geo, base_filename);
+  }
 
   bool display_hull = !animate;
   bool display_triangles = !animate;

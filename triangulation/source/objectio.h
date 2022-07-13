@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <tuple>
 
+#include "geometry.h"
 #include "point.h"
 
 static std::vector<std::vector<Point>> load_obj(const char *file_name)
@@ -131,6 +132,37 @@ static int write_obj(std::vector<std::vector<Point>> &object, std::string file_n
              << "0.0\n";
     }
     output << "s\n";
+  }
+
+  output.close();
+  return 0;
+}
+
+static int write_obj(Geometry &geometry, std::string file_name)
+{
+  std::string out_path("out/");
+  std::string path = out_path + file_name;
+
+  std::cout << "Writing " << path << std::endl;
+
+  std::ofstream output;
+  output.open(path.c_str());
+
+  for (size_t i = 0; i < geometry.parts.size(); ++i)
+  {
+    output << "o part.00" << i + 1 << "\n";
+    for (auto point : geometry.parts[i])
+    {
+      output << "v " << point.x << " " << point.y << " "
+             << "0.0\n";
+    }
+    for (auto triangle : geometry.triangles[i])
+    {
+      output << "f "
+             << triangle.v1 + i + 1 << "// "
+             << triangle.v2 + i + 1 << "// "
+             << triangle.v3 + i + 1 << "//\n";
+    }
   }
 
   output.close();

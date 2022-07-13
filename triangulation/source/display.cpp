@@ -92,6 +92,9 @@ void Display::Update(bool *h_toggle, bool *t_toggle)
         if (t_toggle != nullptr)
           *t_toggle = !(*t_toggle);
         break;
+      case SDLK_ESCAPE:
+        m_isClosed = true;
+        break;
       }
       break;
     default:
