@@ -19,8 +19,8 @@
 #include "display.h"
 
 #define IMG_PATH "assets/Apollo_white.png"
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 720
 
 using namespace std;
 
@@ -36,6 +36,7 @@ int main(int args, char *argv[])
   bool animate = false;
   bool write_out = false;
   int iter_count = 0;
+  int point_try = 14;
 
   if (args >= 3 && strcmp(argv[2], "1") == 0)
   {
@@ -85,11 +86,19 @@ int main(int args, char *argv[])
       cTime = SDL_GetTicks();
       if (cTime > mTime + 400)
       {
-        iter_count += 1;
+        iter_count++;
         demo.triangulate(iter_count);
         mTime = cTime;
       }
     }
+
+    // cTime = SDL_GetTicks();
+    // if (cTime > mTime + 1000)
+    // {
+    //   point_try--;
+    //   cout << point_try << endl;
+    //   mTime = cTime;
+    // }
 
     display.Clear();
     glColor3f(1, 0, 0);
@@ -104,7 +113,7 @@ int main(int args, char *argv[])
     if (display_triangles)
     {
       glColor3f(1, 0.5, 0.3);
-      geo.renderHulls();
+      // geo.renderHulls();
       geo.renderTriangles();
     }
 
@@ -113,11 +122,11 @@ int main(int args, char *argv[])
       demo.render();
     }
 
-    // geo.renderDebug(0, 1, 13);
-    // geo.renderDebugEdge(7, 3);
-    // geo.renderDebugEdge(6, 3);
-    // geo.renderDebugEdge(3, 5);
-    // geo.renderDebugEdge(0, 15);
+    // geo.renderDebug(2, 5, 13);
+    // geo.renderDebugEdge(9, 10);
+    // geo.renderDebugEdge(10, 8);
+    // geo.renderDebugEdge(8, 9);
+    // geo.renderDebugEdge(9, 7);
     display.Update(&display_hull, &display_triangles);
   }
 

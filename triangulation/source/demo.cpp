@@ -63,22 +63,16 @@ void Demo::triangulate(int step)
     }
   }
 
-  while (iter_boundary.size() >= 3 && iteration < 500 && steps + 1 < step)
+  while (iter_boundary.size() >= 3 && iteration < 200 && steps + 1 < step)
   {
-    // cout << endl;
-    // cout << "Iteration: " << iteration << endl;
-    // cout << "Boundary is: ";
-    // for (auto p : iter_boundary)
-    //   cout << p << ", ";
-    // cout << endl;
 
-    int edge_n = (edge + 1) % iter_boundary.size();
-    // cout << "Edge " << edge << ": " << iter_boundary[edge] << ", " << iter_boundary[edge_n] << endl;
-    ++iteration;
-    if (edge >= iter_boundary.size() - 1)
+    if (edge >= boundary.size() - 1)
     {
       edge = 0;
     }
+
+    int edge_n = (edge + 1) % iter_boundary.size();
+    ++iteration;
 
     int chosen_point = points.size() - 1;
 
@@ -87,21 +81,53 @@ void Demo::triangulate(int step)
       chosen_point = (chosen_point - 1) % points.size();
     }
 
-    auto t = Triangle(iter_boundary[edge], iter_boundary[edge_n], chosen_point);
-    Edge helper;
-    // cout << "P, I: " << t.pointsInTriangle(points) << ", " << t.intersectsList(triangles, points) << endl;
-    while (
-        chosen_point >= 0 &&
-        (helper.orientation(iter_boundary[edge], iter_boundary[edge_n], chosen_point, points) == 0 ||
-         (t.pointsInTriangle(points) || t.intersectsList(triangles, points))))
+    Edge h;
+    Circle c = Circle(points[boundary[edge]], points[boundary[edge_n]], points[chosen_point]);
+    Triangle t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+    while (chosen_point >= 0)
     {
-      chosen_point--;
-      // cout << iter_boundary[edge] << ", " << iter_boundary[edge_n] << ", " << chosen_point << endl;
-      if (chosen_point == iter_boundary[edge] || chosen_point == iter_boundary[edge_n])
+      if (chosen_point == boundary[edge] || chosen_point == boundary[edge_n])
       {
+        chosen_point--;
         continue;
       }
-      t = Triangle(iter_boundary[edge], iter_boundary[edge_n], chosen_point);
+
+      // Continue if points are colinear
+      if (h.orientationf(boundary[edge], boundary[edge_n], chosen_point, points) != 1)
+      {
+        // output << "Points not in clockwise order" << endl;
+        chosen_point--;
+        continue;
+      }
+
+      c = Circle(points[boundary[edge]], points[boundary[edge_n]], points[chosen_point]);
+      int in_circle = points.size() - 1;
+      while (in_circle >= 0)
+      {
+        if (in_circle == chosen_point || in_circle == boundary[edge] || in_circle == boundary[edge_n])
+        {
+          in_circle--;
+          continue;
+        }
+        if (c.inCircle(points[in_circle]))
+        {
+          break;
+        }
+        in_circle--;
+      }
+
+      if (in_circle < 0 && chosen_point != boundary[edge] && chosen_point != boundary[edge_n])
+      {
+        // output << "Circle is empty" << endl;
+        t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+        // output << t << endl;
+        bool intersects = t.intersectsList(triangles, points);
+        if (!t.intersectsList(triangles, points))
+        {
+          break;
+        }
+      }
+      chosen_point--;
     }
 
     if (chosen_point < 0)
@@ -124,29 +150,18 @@ void Demo::triangulate(int step)
     {
       int prev = HullBuffer::getIndex(iter_boundary.size(), edge - 1);
       int next = HullBuffer::getIndex(iter_boundary.size(), edge_n + 1);
-      // cout << "Prev, next: " << iter_boundary[prev] << ", " << iter_boundary[next] << endl;
-      // cout << "Chosen: " << chosen_point << endl;
       if (iter_boundary[prev] == chosen_point)
       {
-        // cout << "Point is prev" << endl;
         iter_boundary.erase(iter_boundary.begin() + edge);
       }
       else if (iter_boundary[next] == chosen_point)
       {
-        // cout << "Point is next" << endl;
         iter_boundary.erase(iter_boundary.begin() + edge_n);
       }
       else
       {
         // its a loop, continue.
-        // cout << "Point Extra case" << endl;
-        // Edge h;
-        // if (helper.orientation(iter_boundary[edge], iter_boundary[edge_n], iter_boundary[next], points) == 0)
-        // {
-        //   cout << "iter_boundary LOOP" << endl;
-        // }
-
-        if (chosen_point != next)
+        if (chosen_point != iter_boundary[next])
         {
           // cout << "INVALID LOOP! CHOSEN NOT NEXT" << endl;
           edge++;
@@ -163,8 +178,6 @@ void Demo::triangulate(int step)
       iter_boundary.insert(iter_boundary.begin() + edge_n, chosen_point);
     }
 
-    // cout << "<-- INSERTING TRIANGLE --> " << endl;
-    // cout << t << endl;
     triangles.push_back(t);
     edge = 0;
     steps++;

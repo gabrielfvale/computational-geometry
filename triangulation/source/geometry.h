@@ -166,6 +166,15 @@ struct Edge
     // CW or CCW, respectively
     return (value > 0) ? 1 : 2;
   };
+  static int orientationf(int a, int b, int c, const vector<Point> &points)
+  {
+    double value = (points[b].y - points[a].y) * (points[c].x - points[b].x) - (points[b].x - points[a].x) * (points[c].y - points[b].y);
+    // Colinear
+    if (abs(value) <= 0.01)
+      return 0;
+    // CW or CCW, respectively
+    return (value > 0) ? 1 : 2;
+  };
   bool intersects(const Edge &e, const vector<Point> &points)
   {
     // cout << endl;
@@ -271,6 +280,48 @@ struct Triangle
   {
     return (y2 - y1) * (x - x1) + (-x2 + x1) * (y - y1);
   }
+  double det2D(const Point p1, const Point p2, const Point p3)
+  {
+    // return +p1.first*(p3.second-p2.second)
+    // +p3.first*(p2.second-p1.second)
+    // +p2.first*(p1.second-p3.second);
+    return p1.x * (p2.y - p3.y) +
+           p2.x * (p3.y - p1.y) +
+           p3.x * (p1.y - p2.y);
+  }
+  bool triCollideCheck(const Point p1, const Point p2, const Point p3, double eps = 0.01)
+  {
+    return det2D(p1, p2, p3) <= eps;
+  }
+  bool triTri2d(Triangle triangle, const vector<Point> &points, double eps = 0.0)
+  {
+    vector<int> t1 = {v3, v2, v1};
+    vector<int> t2 = {triangle.v3, triangle.v2, triangle.v1};
+
+    // Check T1 edges against T2
+    for (int i = 0; i < 3; i++)
+    {
+      int j = (i + 1) % 3;
+
+      if (triCollideCheck(points[t1[i]], points[t1[j]], points[t2[0]], eps) &&
+          triCollideCheck(points[t1[i]], points[t1[j]], points[t2[1]], eps) &&
+          triCollideCheck(points[t1[i]], points[t1[j]], points[t2[2]], eps))
+        return false;
+    }
+
+    // Check T2 edges against T1
+    for (int i = 0; i < 3; i++)
+    {
+      int j = (i + 1) % 3;
+
+      if (triCollideCheck(points[t2[i]], points[t2[j]], points[t1[0]], eps) &&
+          triCollideCheck(points[t2[i]], points[t2[j]], points[t1[1]], eps) &&
+          triCollideCheck(points[t2[i]], points[t2[j]], points[t1[2]], eps))
+        return false;
+    }
+
+    return true;
+  }
   bool intersects(Triangle &t, const vector<Point> &points)
   {
     // vector<int> i1 = {v1, v2, v3};
@@ -352,11 +403,12 @@ struct Triangle
 
     return false;
   }
-  bool intersectsList(const vector<Triangle> &ts, const vector<Point> &points)
+  bool intersectsList(const vector<Triangle> &ts, const vector<Point> &points, double eps = 0.01)
   {
-    for (auto t : ts)
+    vector<int> t1 = {v1, v2, v3};
+    for (auto triangle : ts)
     {
-      if (intersects(t, points))
+      if (triTri2d(triangle, points, 1))
         return true;
     }
     return false;
@@ -435,11 +487,8 @@ struct Circle
     double d1 = (2 * ((y31) * (x12) - (y21) * (x13)));
     double d2 = (2 * ((x31) * (y12) - (x21) * (y13)));
 
-    // cout << d1 << endl;
-
     if (d1 == 0 || d2 == 0)
     {
-      // cout << "hey its invalid" << endl;
       valid = false;
       return;
     }
@@ -449,14 +498,10 @@ struct Circle
 
     double c = -pow(p0.x + 0.1, 2) - pow(p0.y, 2) - 2 * g * p0.x + 0.1 - 2 * f * p0.y;
 
-    // eqn of circle be x^2 + y^2 + 2*g*x + 2*f*y + c = 0
-    // where centre is (h = -g, k = -f) and radius r
-    // as r^2 = h^2 + k^2 - c
     double h = -g;
     double k = -f;
     double sqr_of_r = h * h + k * k - c;
 
-    // r is the radius
     float r = sqrt(sqr_of_r);
 
     center = Point(h, k);
@@ -482,16 +527,13 @@ class Geometry
 {
 private:
 public:
-  vector<Point> points = {};
-  vector<pair<int, int>> edges = {};
-  vector<Edge> test_edges = {};
-
   vector<vector<Point>> parts;
   vector<vector<int>> hulls;
   vector<vector<Triangle>> triangles;
 
   Geometry();
   Geometry(const vector<vector<Point>> &p);
+  ~Geometry();
   // Geometry(vector<vector<Point>> &hulls, double eps = 1);
   void calc_hulls();
   void triangulate();
