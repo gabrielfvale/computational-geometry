@@ -1,5 +1,5 @@
 # Name of the project
-PROJ_NAME=convex_hull.out
+PROJ_NAME=triangulation.out
 
 # .cpp files
 C_SOURCE=$(wildcard ./source/*.cpp)
