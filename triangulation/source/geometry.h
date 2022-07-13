@@ -472,7 +472,7 @@ struct Circle
     double dy = abs(p.y - center.y);
     if (dy > radius)
       return false;
-    if (dx + dy <= radius + 0.2)
+    if (dx + dy <= radius)
       return true;
     return (dx * dx + dy * dy <= radius * radius);
   }
