@@ -148,6 +148,9 @@ static int write_obj(Geometry &geometry, std::string file_name)
   std::ofstream output;
   output.open(path.c_str());
 
+  output << "# Object exported by triangulation program\n";
+
+  int offset = 1;
   for (size_t i = 0; i < geometry.parts.size(); ++i)
   {
     output << "o part.00" << i + 1 << "\n";
@@ -159,10 +162,11 @@ static int write_obj(Geometry &geometry, std::string file_name)
     for (auto triangle : geometry.triangles[i])
     {
       output << "f "
-             << triangle.v1 + i + 1 << "// "
-             << triangle.v2 + i + 1 << "// "
-             << triangle.v3 + i + 1 << "//\n";
+             << triangle.v1 + offset << "// "
+             << triangle.v2 + offset << "// "
+             << triangle.v3 + offset << "//\n";
     }
+    offset += geometry.parts[i].size();
   }
 
   output.close();

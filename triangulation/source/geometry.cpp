@@ -201,10 +201,6 @@ void Geometry::triangulate()
             output << available[chosen_point] << endl;
             break;
           }
-          else
-          {
-            output << intersects << endl;
-          }
         }
         chosen_point--;
       }
