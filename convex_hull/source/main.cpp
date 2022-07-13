@@ -14,6 +14,7 @@
 #include "objectio.h"
 #include "convexhull.h"
 #include "geometry.h"
+#include "demo.h"
 #include "polygon.h"
 #include "display.h"
 
@@ -54,12 +55,15 @@ int main(int args, char *argv[])
   vector<vector<Point>> test = joined_convex_hull(object);
 
   Geometry geo = Geometry(object);
+  Demo demo = Demo(object);
+
+  demo.triangulate(-1);
 
   geo.calc_hulls();
-  geo.triangulate(iter_count);
+  geo.triangulate();
 
-  bool display_hull = true;
-  bool display_triangles = true;
+  bool display_hull = !animate;
+  bool display_triangles = !animate;
 
   int mTime = SDL_GetTicks(), cTime = SDL_GetTicks();
 
@@ -68,10 +72,10 @@ int main(int args, char *argv[])
     if (animate)
     {
       cTime = SDL_GetTicks();
-      if (cTime > mTime + 200)
+      if (cTime > mTime + 400)
       {
         iter_count += 1;
-        geo.triangulate(iter_count);
+        demo.triangulate(iter_count);
         mTime = cTime;
       }
     }
@@ -91,6 +95,11 @@ int main(int args, char *argv[])
       glColor3f(1, 0.5, 0.3);
       geo.renderHulls();
       geo.renderTriangles();
+    }
+
+    if (animate)
+    {
+      demo.render();
     }
 
     // geo.renderDebug(0, 1, 13);

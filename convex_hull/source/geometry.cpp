@@ -25,7 +25,7 @@ void Geometry::calc_hulls()
   }
 }
 
-void Geometry::triangulate(int step)
+void Geometry::triangulate()
 {
   for (size_t k = 0; k < hulls.size(); ++k)
   {
@@ -74,7 +74,7 @@ void Geometry::triangulate(int step)
       }
     }
 
-    while (boundary.size() >= 3 && iteration < 500 && (step == -1 || steps + 1 < step))
+    while (boundary.size() >= 3 && iteration < 500)
     {
       // cout << endl;
       // cout << "Iteration: " << iteration << endl;
@@ -222,7 +222,6 @@ void Geometry::triangulate(int step)
       // cout << t << endl;
       iter_triangles.push_back(t);
       edge = 0;
-      steps++;
     }
 
     if (boundary.size() == 3)
