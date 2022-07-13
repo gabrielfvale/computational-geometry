@@ -492,6 +492,7 @@ public:
 
   Geometry();
   Geometry(const vector<vector<Point>> &p);
+  ~Geometry();
   // Geometry(vector<vector<Point>> &hulls, double eps = 1);
   void calc_hulls();
   void triangulate();
