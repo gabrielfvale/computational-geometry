@@ -482,10 +482,6 @@ class Geometry
 {
 private:
 public:
-  vector<Point> points = {};
-  vector<pair<int, int>> edges = {};
-  vector<Edge> test_edges = {};
-
   vector<vector<Point>> parts;
   vector<vector<int>> hulls;
   vector<vector<Triangle>> triangles;
