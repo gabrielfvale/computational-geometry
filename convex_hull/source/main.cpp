@@ -46,7 +46,7 @@ int main(int args, char *argv[])
   const char *filename = argv[1];
   string path(filename);
   string base_filename = path.substr(path.find_last_of("/\\") + 1);
-  const string title = "Convex Hull: " + base_filename;
+  const string title = "Triangulation from Hull: " + base_filename;
 
   Display display(WINDOW_WIDTH, WINDOW_HEIGHT, title);
 
@@ -88,7 +88,8 @@ int main(int args, char *argv[])
 
     if (display_triangles)
     {
-      glColor3f(1, 1, 0);
+      glColor3f(1, 0.5, 0.3);
+      geo.renderHulls();
       geo.renderTriangles();
     }
 

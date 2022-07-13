@@ -350,57 +350,6 @@ struct Triangle
     if (in_triangle_sum == 3)
       return true;
 
-    // for (int i = 0; i < 3; ++i)
-    // {
-    //   for (int j = 0; j < 3; ++j)
-    //   {
-    //     if (e1[i].intersects(t1[j], points))
-    //       return true;
-    //   }
-    // }
-
-    // for (int i = 0; i < 3; ++i)
-    // {
-    //   for (int j = 0; j < 3; ++j)
-    //   {
-    //     if (e1[i].intersects(t1[j], points))
-    //       return true;
-    //   }
-    // }
-    // vector<int> t1 = {v1, v2, v3};
-    // vector<int> t2 = {t.v1, t.v2, t.v3};
-    // int equal_count = 0;
-    // for (size_t i = 0; i < t1.size(); ++i)
-    // {
-    //   for (size_t j = 0; j < t1.size(); ++j)
-    //   {
-    //     if (t1[i] == t2[j])
-    //       equal_count++;
-    //   }
-    // }
-    // if (equal_count >= 3)
-    // {
-    //   return true;
-    // }
-
-    // for (int p : t1)
-    // {
-    //   Point k = points[p];
-    //   if (pointInTriangle(k, points))
-    //   {
-    //     return true;
-    //   }
-    // }
-
-    // for (int p : t2)
-    // {
-    //   Point k = points[p];
-    //   if (t.pointInTriangle(k, points))
-    //   {
-    //     return true;
-    //   }
-    // }
-
     return false;
   }
   bool intersectsList(const vector<Triangle> &ts, const vector<Point> &points)
@@ -414,25 +363,6 @@ struct Triangle
   }
   bool pointInTriangle(Point &p, const vector<Point> &points)
   {
-    // for (size_t i = 0; i < points.size(); ++i)
-    // {
-    //   if (i != v1 && i != v2 && i != v3)
-    //   {
-    //     Point p = points[i];
-    //     float d1, d2, d3;
-    //     bool has_neg, has_pos;
-
-    //     d1 = sign(p, points[v1], points[v2]);
-    //     d2 = sign(p, points[v2], points[v3]);
-    //     d3 = sign(p, points[v3], points[v1]);
-
-    //     has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-    //     has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-    //     if (!(has_neg && has_pos))
-    //       return true;
-    //   }
-    // }
 
     Point p1 = points[v1];
     Point p2 = points[v2];
@@ -547,6 +477,7 @@ struct Circle
     return (dx * dx + dy * dy <= radius * radius);
   }
 };
+
 class Geometry
 {
 private:
@@ -559,7 +490,7 @@ public:
 
   vector<vector<Point>> parts;
   vector<vector<int>> hulls;
-  vector<Triangle> triangles;
+  vector<vector<Triangle>> triangles;
 
   Geometry();
   Geometry(const vector<vector<Point>> &p);
