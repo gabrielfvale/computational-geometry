@@ -123,7 +123,9 @@ int main(int args, char *argv[])
     }
 
     // geo.renderDebug(2, 5, 13);
-    // geo.renderDebugEdge(6, 9);
+    // geo.renderDebugEdge(9, 10);
+    // geo.renderDebugEdge(10, 8);
+    // geo.renderDebugEdge(8, 9);
     // geo.renderDebugEdge(9, 7);
     display.Update(&display_hull, &display_triangles);
   }
