@@ -47,6 +47,10 @@ void Geometry::triangulate()
     for (auto p : parts[k])
       available.push_back(p);
 
+    vector<int> left;
+    for (size_t i = 0; i < parts[k].size(); ++i)
+      left.push_back(i);
+
     vector<Triangle> iter_triangles;
 
     int iteration = 0;
@@ -74,17 +78,18 @@ void Geometry::triangulate()
       }
     }
 
-    while (boundary.size() >= 3 && iteration < 500)
+    while (boundary.size() >= 3 && iteration <= 2)
     {
-      // cout << endl;
-      // cout << "Iteration: " << iteration << endl;
-      // cout << "Boundary is: ";
-      // for (auto p : boundary)
-      //   cout << p << ", ";
-      // cout << endl;
+      cout << endl;
+      cout << "Iteration: " << iteration << endl;
+      cout << "Boundary is: ";
+      for (auto p : boundary)
+        cout << p << ", ";
+      cout << endl;
 
       int edge_n = (edge + 1) % boundary.size();
-      // cout << "Edge " << edge << ": " << boundary[edge] << ", " << boundary[edge_n] << endl;
+      cout << "Edge " << edge << ": " << boundary[edge] << ", " << boundary[edge_n] << endl;
+      cout << "Edge P: " << available[boundary[edge]] << ", " << available[boundary[edge_n]] << endl;
       ++iteration;
       if (edge >= boundary.size() - 1)
       {
@@ -97,67 +102,82 @@ void Geometry::triangulate()
         chosen_point = (chosen_point - 1) % available.size();
       }
 
-      // Circle c = Circle(available[boundary[edge]], available[boundary[edge_n]], available[chosen_point]);
-      // Triangle t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
-      // // c.inCircle(available[0]);
-      // bool circle_empty = false;
-      // while (chosen_point < available.size() - 1)
-      // {
-      //   if (chosen_point == boundary[edge] || chosen_point == boundary[edge_n])
-      //   {
-      //     chosen_point++;
-      //     continue;
-      //   }
-      //   // cout << "creating circle for point " << chosen_point << endl;
-      //   c = Circle(available[boundary[edge]], available[boundary[edge_n]], available[chosen_point]);
-      //   // cout << "circle valid: " << c.valid << endl;
-      //   int left_points = available.size();
-      //   if (!c.valid)
-      //   {
-      //     chosen_point++;
-      //     continue;
-      //   }
-      //   for (auto point : available)
-      //   {
-      //     left_points--;
-      //     if (c.inCircle(point))
-      //     {
-      //       // cout << "a point is in this circle." << endl;
-      //       // cout << endl;
-      //       break;
-      //     }
-      //   }
-      //   if (left_points == 0)
-      //   {
-      //     cout << "Circle is empty" << endl;
-      //     t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
-      //     // cout << t << endl;
-      //     if (!t.intersectsList(triangles, available))
-      //     {
-      //       circle_empty = true;
-      //       cout << "Found a circle and triangle combo: " << t << endl;
-      //       break;
-      //     }
-      //   }
-      //   chosen_point++;
-      // }
-
-      auto t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
-      Edge helper;
-      // cout << "P, I: " << t.pointsInTriangle(available) << ", " << t.intersectsList(triangles, available) << endl;
-      while (
-          chosen_point >= 0 &&
-          (helper.orientation(boundary[edge], boundary[edge_n], chosen_point, available) == 0 ||
-           (t.pointsInTriangle(available) || t.intersectsList(iter_triangles, parts[k]))))
+      Edge h;
+      Circle c = Circle(available[boundary[edge]], available[boundary[edge_n]], available[chosen_point]);
+      Triangle t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+      // c.inCircle(available[0]);
+      bool circle_empty = false;
+      while (chosen_point >= 0)
       {
-        chosen_point--;
-        // cout << boundary[edge] << ", " << boundary[edge_n] << ", " << chosen_point << endl;
+        cout << "Checking point " << chosen_point << endl;
+        cout << "Checking point " << available[chosen_point] << endl;
         if (chosen_point == boundary[edge] || chosen_point == boundary[edge_n])
         {
+          chosen_point--;
           continue;
         }
-        t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+
+        // Continue if points are colinear
+        if (h.orientation(boundary[edge], boundary[edge_n], chosen_point, available) == 0)
+        {
+          cout << "Points are colinear" << endl;
+          chosen_point--;
+          continue;
+        }
+
+        c = Circle(available[boundary[edge]], available[boundary[edge_n]], available[chosen_point]);
+        int left_points = left.size();
+        for (auto p_index : left)
+        {
+          left_points--;
+          if (p_index == chosen_point)
+          {
+            continue;
+          }
+          if (c.inCircle(available[p_index]))
+          {
+            cout << "a point is in this circle:" << endl;
+            cout << "Chosen, C, R: "
+                 << available[chosen_point] << " "
+                 << c.center << " "
+                 << c.radius << " "
+                 << endl;
+            cout << available[p_index] << endl;
+            cout << endl;
+            break;
+          }
+        }
+        if (left_points == 0)
+        {
+          cout << "Circle is empty" << endl;
+          t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+          // cout << t << endl;
+          if (!t.intersectsList(iter_triangles, available))
+          {
+            circle_empty = true;
+            cout << "Found a circle and triangle combo: " << t << endl;
+            break;
+          }
+        }
+        chosen_point--;
       }
+
+      // auto t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+      // Edge helper;
+      // // cout << "P, I: " << t.pointsInTriangle(available) << ", " << t.intersectsList(triangles, available) << endl;
+      // while (
+      //     chosen_point >= 0 &&
+      //     (helper.orientation(boundary[edge], boundary[edge_n], chosen_point, available) == 0 ||
+      //      (t.pointsInTriangle(available) || t.intersectsList(iter_triangles, parts[k]))))
+      // {
+      //   chosen_point--;
+      //   // cout << boundary[edge] << ", " << boundary[edge_n] << ", " << chosen_point << endl;
+      //   if (chosen_point == boundary[edge] || chosen_point == boundary[edge_n])
+      //   {
+      //     continue;
+      //   }
+      //   t = Triangle(boundary[edge], boundary[edge_n], chosen_point);
+      // }
 
       if (chosen_point < 0)
       {
@@ -185,11 +205,21 @@ void Geometry::triangulate()
         {
           // cout << "Point is prev" << endl;
           boundary.erase(boundary.begin() + edge);
+          left.erase(left.begin() + boundary[edge]);
+          cout << "Left is: ";
+          for (auto p : left)
+            cout << p << ", ";
+          cout << endl;
         }
         else if (boundary[next] == chosen_point)
         {
           // cout << "Point is next" << endl;
           boundary.erase(boundary.begin() + edge_n);
+          left.erase(left.begin() + boundary[edge_n]);
+          cout << "Left is: ";
+          for (auto p : left)
+            cout << p << ", ";
+          cout << endl;
         }
         else
         {
@@ -233,7 +263,7 @@ void Geometry::triangulate()
       }
     }
 
-    // hulls[k] = boundary;
+    hulls[k] = boundary;
     triangles.push_back(iter_triangles);
   }
 }
@@ -316,14 +346,14 @@ void Geometry::renderDebug(int v1, int v2, int p)
   // Next edge
   glColor3f(1, 1, 0);
   renderDebugEdge(c_v2, hulls[0][next]);
-  glColor3f(1, 1, 0);
-  renderDebugEdge(c_p, hulls[0][next_p]);
+  // glColor3f(1, 1, 0);
+  // renderDebugEdge(c_p, hulls[0][next_p]);
   // Prev edge
   glColor3f(0, 1, 1);
   renderDebugEdge(hulls[0][prev], c_v1);
   // Final triangle
-  glColor3f(1, 1, 1);
-  renderDebugEdge(c_p, c_v2);
+  // glColor3f(1, 1, 1);
+  // renderDebugEdge(c_p, c_v2);
 }
 
 void Geometry::renderTriangles()
