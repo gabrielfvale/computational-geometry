@@ -150,15 +150,19 @@ static int write_obj(Geometry &geometry, std::string file_name)
 
   output << "# Object exported by triangulation program\n";
 
-  int offset = 1;
   for (size_t i = 0; i < geometry.parts.size(); ++i)
   {
-    output << "o part.00" << i + 1 << "\n";
+    // output << "o part.00" << i + 1 << "\n";
     for (auto point : geometry.parts[i])
     {
       output << "v " << point.x << " " << point.y << " "
              << "0.0\n";
     }
+  }
+
+  int offset = 1;
+  for (size_t i = 0; i < geometry.triangles.size(); ++i)
+  {
     for (auto triangle : geometry.triangles[i])
     {
       output << "f "

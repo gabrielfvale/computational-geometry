@@ -184,7 +184,12 @@ void Demo::triangulate(int step)
     }
 
     triangles.push_back(t);
-    edge = 0;
+
+    selected_edge.first = boundary[edge];
+    selected_edge.second = boundary[edge_n];
+
+    // edge = 0;
+
     steps++;
   }
 
@@ -196,6 +201,8 @@ void Demo::triangulate(int step)
       triangles.push_back(t);
     }
     iter_boundary.clear();
+    selected_edge.first = 0;
+    selected_edge.second = 0;
   }
 
   boundary = iter_boundary;
@@ -225,7 +232,7 @@ void Demo::render()
   }
   glEnd();
 
-  glColor3f(0, 0, 1);
+  glColor3f(0, 1, 0);
   glBegin(GL_LINES);
   glVertex2f(points[selected_edge.first].x, points[selected_edge.first].y);
   glVertex2f(points[selected_edge.second].x, points[selected_edge.second].y);
